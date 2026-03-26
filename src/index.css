@@ -1,19 +1,34 @@
 @import "tailwindcss";
 
-/* Definizione del tema personalizzato per Tailwind v4 */
+/* Definizione del tema personalizzato 01Informatica per Tailwind v4 */
 @theme {
-  --color-lions-blue: #00338d;
-  --color-lions-gold: #ffb81c;
+  --color-brand-blue: #0033A0;
+  --color-brand-red: #E31837;
+  --color-brand-yellow: #FFC72C;
+  --color-brand-dark: #0B132B;
   
   --radius-4xl: 2rem;
 }
 
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
 }
 
 body {
   margin: 0;
+  padding: 0;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Nascondiamo le freccette standard dagli input numerici per pulizia mobile */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Animazioni fluide per il cambio tema */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
 }
