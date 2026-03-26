@@ -9,7 +9,7 @@ const LOGO_01INFORMATICA = "/logo_01informatica_retina.png";
 
 // --- CONFIGURAZIONE SUPABASE ---
 const SUPABASE_URL = "https://uywtfwjkyiacdfgsbtgo.supabase.co"; 
-const SUPABASE_ANON_KEY = "uywtfwjkyiacdfgsbtgo";
+const SUPABASE_ANON_KEY = "sb_publishable_BcNN8eqhJt4rUtCM91Ew1g__myBBLLO";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Componente helper per renderizzare il Logo ovunque
