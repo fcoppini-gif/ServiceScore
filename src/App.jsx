@@ -5,16 +5,11 @@ import {
   CheckCircle2, LogOut, User, TrendingUp, ArrowRight, Sparkles
 } from 'lucide-react';
 
-// =========================================================================
-// 🚀 INSERISCI QUI IL LINK AL TUO LOGO UFFICIALE 01INFORMATICA
-// Es: "https://www.tuosito.it/logo-01informatica.png"
-// Se lo lasci vuoto, apparirà una scritta stilizzata.
-// =========================================================================
 const LOGO_01INFORMATICA = "assets/logo_01informatica_retina.png"; 
 
 // --- CONFIGURAZIONE SUPABASE ---
-const SUPABASE_URL = "INCOLLA_IL_TUO_URL_QUI"; 
-const SUPABASE_ANON_KEY = "INCOLLA_LA_TUA_ANON_KEY_QUI";
+const SUPABASE_URL = "https://uywtfwjkyiacdfgsbtgo.supabase.co"; 
+const SUPABASE_ANON_KEY = "uywtfwjkyiacdfgsbtgo";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Componente helper per renderizzare il Logo ovunque
