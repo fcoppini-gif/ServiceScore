@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Installa ServiceScore - 01Informatica</title>
     
-    <!-- Meta per Web App -->
+    <!-- Collegamento al Manifest per PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0033A0">
+
+    <!-- Meta per Web App iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ServiceScore">
+    <link rel="apple-touch-icon" href="favicon.svg">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -75,7 +80,7 @@
 
         <div class="text-center space-y-2 mb-10">
             <h1 class="text-4xl font-black tracking-tighter uppercase text-white leading-none">ServiceScore</h1>
-            <p class="text-slate-400 text-sm mt-4 font-bold uppercase tracking-widest">Installazione Ufficiale</p>
+            <p class="text-slate-400 text-sm mt-4 font-bold uppercase tracking-widest text-balance">Installazione Ufficiale</p>
         </div>
         
         <!-- Blocco Dinamico Android/iOS -->
@@ -94,13 +99,13 @@
             </div>
 
             <!-- PULSANTE ANDROID (Appare solo se supportato) -->
-            <button id="install-button" class="hidden w-full bg-gradient-to-r from-brand-blue to-brand-red p-6 rounded-[2rem] font-black uppercase tracking-widest text-lg shadow-xl animate-pulse-glow transition-transform active:scale-95">
+            <button id="install-button" class="hidden w-full bg-gradient-to-r from-brand-blue to-brand-red p-6 rounded-[2rem] font-black uppercase tracking-widest text-lg shadow-xl animate-pulse-glow transition-transform active:scale-95 border-none text-white cursor-pointer">
                 Installa Ora
             </button>
 
             <!-- PULSANTE FALLBACK / APRI WEB -->
             <a href="https://servicescore.vercel.app" class="w-full block">
-                <button class="w-full bg-white/10 border border-white/20 text-white font-black py-5 rounded-[2rem] hover:bg-white/20 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-3">
+                <button class="w-full bg-white/10 border border-white/20 text-white font-black py-5 rounded-[2rem] hover:bg-white/20 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-3 cursor-pointer">
                     Apri nel Browser
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                 </button>
@@ -125,9 +130,10 @@
         // Logica per Android / Chrome
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Impedisce il banner automatico brutto
+            console.log('beforeinstallprompt event fired');
+            e.preventDefault(); 
             deferredPrompt = e;
-            installBtn.classList.remove('hidden'); // Mostra il NOSTRO pulsante figo
+            installBtn.classList.remove('hidden'); 
         });
 
         installBtn.addEventListener('click', async () => {
@@ -140,6 +146,12 @@
                 deferredPrompt = null;
                 installBtn.classList.add('hidden');
             }
+        });
+
+        // Nasconde il pulsante se l'app è già installata
+        window.addEventListener('appinstalled', () => {
+            installBtn.classList.add('hidden');
+            deferredPrompt = null;
         });
     </script>
 </body>
