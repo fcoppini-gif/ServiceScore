@@ -5,7 +5,7 @@ import {
   CheckCircle2, LogOut, User, TrendingUp, ArrowRight, Sparkles
 } from 'lucide-react';
 
-const LOGO_01INFORMATICA = "assets/logo_01informatica_retina.png"; 
+const LOGO_01INFORMATICA = "/logo_01informatica_retina.png";
 
 // --- CONFIGURAZIONE SUPABASE ---
 const SUPABASE_URL = "https://uywtfwjkyiacdfgsbtgo.supabase.co"; 
@@ -162,7 +162,7 @@ export default function App() {
         <div className="flex flex-col items-center mb-10">
           <BrandLogo className="h-20 mb-4" />
           <h1 className="text-3xl font-black tracking-tighter uppercase text-white drop-shadow-md">ServiceScore</h1>
-          <p className="text-[#FFC72C] font-bold text-sm tracking-widest uppercase mt-1">Lions District Tracker</p>
+          <p className="text-[#FFC72C] font-bold text-sm tracking-widest uppercase mt-1">Professional District Tracker</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
