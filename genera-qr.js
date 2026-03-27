@@ -1,23 +1,22 @@
 import QRCode from 'qrcode';
 
-const VERCEL_URL = 'https://servicescore.vercel.app'; 
-
-// Nome del file immagine che verrà salvato
-const OUTPUT_FILE = 'ServiceScore_QRCode_Base.png';
+const VERCEL_URL = process.env.VITE_APP_URL || process.env.VERCEL_URL || 'https://servicescore.vercel.app';
+const OUTPUT_FILE = 'ServiceScore_QRCode.png';
 
 console.log('Generazione del QR Code in corso...');
 
 QRCode.toFile(OUTPUT_FILE, VERCEL_URL, {
   color: {
-    dark: '#0033A0',  // Blu 01Informatica
-    light: '#FFFFFF'  // Sfondo bianco
+    dark: '#0033A0',
+    light: '#FFFFFF',
   },
-  width: 1000,        // Alta risoluzione per la stampa
-  margin: 2           // Margine pulito
+  width: 1000,
+  margin: 2,
 }, function (err) {
   if (err) {
     console.error('Errore durante la generazione:', err);
+    process.exit(1);
   } else {
-    console.log(`✅ Fatto! QR Code salvato come: ${OUTPUT_FILE}`);
+    console.log(`QR Code salvato come: ${OUTPUT_FILE}`);
   }
 });

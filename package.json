@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "qr": "node genera-qr.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",
@@ -16,6 +17,7 @@
     "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.2",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
