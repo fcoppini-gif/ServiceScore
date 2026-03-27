@@ -114,12 +114,12 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 ml-2">Nuova Password</label>
               <input type="password" placeholder="Minimo 6 caratteri" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full pl-4 pr-4 py-4 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/20 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold" required minLength={6} />
+                className="w-full pl-4 pr-4 py-4 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/20 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold" required minLength={6} autoComplete="new-password" />
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 ml-2">Conferma Password</label>
               <input type="password" placeholder="Ripeti la password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-4 pr-4 py-4 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/20 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold" required minLength={6} />
+                className="w-full pl-4 pr-4 py-4 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/20 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold" required minLength={6} autoComplete="new-password" />
             </div>
             <button type="submit" disabled={isChangingPassword}
               className="w-full cursor-pointer bg-brand-blue text-white font-black py-4 rounded-2xl uppercase tracking-widest text-sm hover:shadow-xl active:scale-95 transition-all border-none disabled:opacity-50 flex items-center justify-center gap-2">

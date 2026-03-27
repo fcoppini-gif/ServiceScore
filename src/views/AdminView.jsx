@@ -227,17 +227,29 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   // AZIONI UTENTI
   // =========================================================================
   const toggleUserClub = async (userId, clubId, isLinked) => {
-    if (isLinked) {
-      await supabase.from('utenti_club').delete().eq('id_utente', userId).eq('id_club', clubId);
-    } else {
-      await supabase.from('utenti_club').insert({ id_utente: userId, id_club: clubId });
+    try {
+      if (isLinked) {
+        await supabase.from('utenti_club').delete().eq('id_utente', userId).eq('id_club', clubId);
+      } else {
+        // Upsert per evitare 409 Conflict se esiste già
+        await supabase.from('utenti_club').upsert(
+          { id_utente: userId, id_club: clubId },
+          { onConflict: 'id_utente,id_club' }
+        );
+      }
+    } catch (err) {
+      console.error('Errore toggle club:', err);
     }
     fetchUsers();
   };
 
   const changeUserRole = async (userId, newRole) => {
-    await supabase.from('utenti').update({ ruolo: newRole }).eq('id', userId);
-    toast.success('Ruolo aggiornato');
+    try {
+      await supabase.from('utenti').update({ ruolo: newRole }).eq('id', userId);
+      toast.success('Ruolo aggiornato');
+    } catch {
+      toast.error('Errore aggiornamento ruolo');
+    }
     fetchUsers();
   };
 
