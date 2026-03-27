@@ -113,6 +113,8 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
         <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[2.5rem] border border-slate-200 dark:border-white/20 shadow-xl">
           <h2 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-6">Cambio Password</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
+            {/* Campo username nascosto per accessibilità password managers */}
+            <input type="text" name="username" value={userProfile?.username || ''} autoComplete="username" readOnly className="sr-only" tabIndex={-1} />
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 ml-2">Nuova Password</label>
               <input type="password" placeholder="Minimo 6 caratteri" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}

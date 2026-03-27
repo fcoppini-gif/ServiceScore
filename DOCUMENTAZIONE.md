@@ -8,24 +8,47 @@ Sviluppare **ServiceScore**, una Web App moderna e ottimizzata per dispositivi m
 
 ---
 
-## 2. Flusso Operativo (User Experience)
+## 2. Sistema di Ruoli
 
-L'applicazione è una **Single Page Application (SPA)** con routing React Router:
+L'applicazione gestisce due tipi di utente:
 
-1. **Login** (`/login`): Accesso riservato con email/password tramite Supabase Auth. Supporta anche la registrazione con conferma email.
+| Ruolo | Cosa può fare |
+|---|---|
+| **Admin** | Vede classifica completa. Gestisce club, service, regole, utenti. Crea nuovi utenti. |
+| **Referente** | Vede classifica filtrata solo dei suoi club associati. Inserisce valutazioni solo per quelli. |
 
-2. **Dashboard** (`/dashboard`): Visualizzazione immediata della **Classifica Generale** dei Club in base ai punti accumulati. Pulsante "NUOVA ANALISI" per avviare il wizard.
+### Flusso utente Admin
+1. Login → Dashboard (classifica completa) → pulsante "ADMIN"
+2. Pannello Admin con 5 sezioni: Classifica, Club, Service, Regole, Utenti
+3. Può creare utenti, associarli ai club, cambiarne il ruolo
 
-3. **Wizard di Inserimento Dati** (`/insert`): Un percorso guidato in 3 step:
-   - **Step 1**: Selezione del Club e del Tipo di Service (es. "Progetto Salvo", "Conferenza").
-   - **Step 2**: Compilazione dei risultati (es. Volontari coinvolti, Fondi raccolti). L'interfaccia si adatta dinamicamente mostrando solo i parametri pertinenti applicando limiti automatici per evitare errori di battitura.
-   - **Step 3**: Riepilogo con calcolo in tempo reale dei punti guadagnati. Conferma e salvataggio.
-
-4. **Successo** (`/success`): Conferma animata dopo il salvataggio riuscito.
+### Flusso utente Referente
+1. Login → Dashboard (classifica solo dei suoi club)
+2. "NUOVA ANALISI" → Wizard 3 step (solo i suoi club nella tendina)
+3. Account per cambio password e avatar
 
 ---
 
-## 3. Logica di Valutazione Dinamica
+## 3. Flusso Operativo (User Experience)
+
+L'applicazione è una **Single Page Application (SPA)** con routing React Router:
+
+| URL | Pagina | Chi |
+|---|---|---|
+| `/login` | Login/registrazione | Non loggato |
+| `/dashboard` | Classifica club | Tutti (filtrata se referente) |
+| `/insert` | Wizard inserimento 3 step | Tutti (solo club associati se referente) |
+| `/success` | Conferma salvataggio | Tutti |
+| `/account` | Password + avatar | Tutti |
+| `/admin/classifica` | Classifica completa | Solo admin |
+| `/admin/club` | Gestione club (CRUD) | Solo admin |
+| `/admin/service` | Gestione service (CRUD) | Solo admin |
+| `/admin/regole` | Gestione regole calcolo | Solo admin |
+| `/admin/utenti` | Gestione utenti + associazione club | Solo admin |
+
+---
+
+## 4. Logica di Valutazione Dinamica
 
 Il cuore del sistema è un **motore algoritmico proporzionale**. Non esistono punteggi fissi: il "peso" di ogni azione cambia in base al tipo di Service svolto.
 
@@ -49,52 +72,72 @@ Punti Ottenuti = (Valutazione Inserita / Range Massimo) × Punti Massimi Previst
 
 ---
 
-## 4. Architettura Cloud e Hosting (Zero Costi)
+## 5. Architettura Cloud e Hosting
 
 ### Frontend (Interfaccia Utente)
 - **Framework**: React 19 + Vite 8
-- **CSS**: Tailwind CSS v4 con tema brand personalizzato
-- **Hosting**: Vercel (deploy automatico da GitHub, HTTPS, dominio gratuito `servicescore.vercel.app`)
+- **CSS**: Tailwind CSS v4 con tema brand 01Informatica
+- **Routing**: React Router DOM
+- **Animazioni**: tailwindcss-animate
+- **Hosting**: Vercel (deploy automatico da GitHub, HTTPS, dominio `servicescore.vercel.app`)
 
 ### Backend e Database
 - **Piattaforma**: Supabase (PostgreSQL-as-a-Service)
 - **Autenticazione**: Supabase Auth (email/password)
-- **Database**: PostgreSQL relazionale con 7 tabelle
+- **Storage**: Supabase Storage (bucket `avatars` per foto profilo)
+- **Database**: PostgreSQL relazionale
 
 ---
 
-## 5. Struttura Database (Supabase)
-
-Il database è composto da **7 tabelle relazionali**:
+## 6. Struttura Database (Supabase)
 
 ### Tabelle Principali
 
 | Tabella | Descrizione |
 |---|---|
-| `club` | Anagrafica dei Lions Club (id, nome) |
+| `utenti` | Profili utente (id, username, ruolo, avatar_url) — collegata a auth.users |
+| `utenti_club` | Associazione utente ↔ club (id_utente, id_club) |
+| `club` | Anagrafica Lions Club (id, nome) |
 | `tipi_service` | Tipologie di Service (id, nome) |
 | `parametri` | Parametri valutabili (id, nome) |
-| `regole_calcolo` | **Tabella "Magica"**: mappa incrocio Tipo Service × Parametro × Range × Punti Max (id, id_tipo_service, id_parametro, range_min, range_max, punti_max) |
+| `regole_calcolo` | Service × Parametro × Range × Punti Max |
 
 ### Tabelle di Salvataggio
 
 | Tabella | Descrizione |
 |---|---|
-| `service_inseriti` | Testata delle submission (id, id_club, id_tipo_service, punteggio_totale) |
-| `dettaglio_inserimenti` | Righe di dettaglio (id, id_service_inserito, id_parametro, valore_dichiarato, punti_ottenuti) |
+| `service_inseriti` | Testata submission (id, id_utente, id_club, id_tipo_service, punteggio_totale) |
+| `dettaglio_inserimenti` | Righe dettaglio (id, id_service_inserito, id_parametro, valore_dichiarato, punti_ottenuti) |
 
 ### Schema Relazionale
 
 ```
-club ─────┐
-           ├──→ service_inseriti ──→ dettaglio_inserimenti ←── parametri
-tipi_service┘         │
-                      └──→ regole_calcolo (per validazione e calcolo)
+auth.users ──→ utenti ──→ utenti_club ←── club
+                           │
+                           └──→ service_inseriti ──→ dettaglio_inserimenti ←── parametri
+                                                      │
+                                                      └──→ regole_calcolo
+                              tipi_service ───────────┘
 ```
+
+### Trigger Database
+
+```sql
+-- Crea automaticamente profilo utente alla registrazione
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```
+
+### Storage
+
+| Bucket | Descrizione |
+|---|---|
+| `avatars` | Foto profilo utenti (public) |
 
 ---
 
-## 6. Struttura del Codice
+## 7. Struttura del Codice
 
 ```
 src/
@@ -102,24 +145,29 @@ src/
 │   ├── supabase.js          ← Client Supabase (connessione DB)
 │   └── config.js            ← Costanti (logo, URL app)
 ├── components/
-│   ├── BrandLogo.jsx        ← Logo 01Informatica
+│   ├── BrandLogo.jsx        ← Logo ufficiale dell'app
+│   ├── Footer.jsx           ← "Powered by 01Informatica"
+│   ├── Navbar.jsx           ← Barra navigazione condivisa (link admin, menu utente)
 │   ├── ProgressRing.jsx     ← Anello SVG punteggio animato
 │   └── ThemeSwitcher.jsx    ← Toggle tema chiaro/scuro/sistema
 ├── hooks/
+│   ├── useAuth.jsx          ← Gestisce auth + ruolo + club associati + refresh
 │   └── useToast.jsx         ← Sistema notifiche toast
 ├── views/
-│   ├── LoginView.jsx        ← Pagina login/registrazione
-│   ├── DashboardView.jsx    ← Classifica club
-│   ├── InsertWizardView.jsx ← Wizard 3 step inserimento dati
-│   └── SuccessView.jsx      ← Conferma salvataggio
-├── App.jsx                  ← Routing + tema + autenticazione
+│   ├── LoginView.jsx        ← Login/registrazione
+│   ├── DashboardView.jsx    ← Classifica (filtrata per referente, completa per admin)
+│   ├── InsertWizardView.jsx ← Wizard 3 step (solo club associati se referente)
+│   ├── SuccessView.jsx      ← Conferma salvataggio
+│   ├── AccountView.jsx      ← Cambio password + upload avatar
+│   └── AdminView.jsx        ← Pannello admin (5 sezioni)
+├── App.jsx                  ← Routing + tema + auth
 ├── main.jsx                 ← Entry point React
-└── index.css                ← Stili globali + tema brand
+└── index.css                ← Stili globali + tema brand + dark mode alto contrasto
 
 public/
-├── favicon.svg              ← Icona PWA (scudo SS)
+├── logo_ufficiale.png       ← Icona PWA / favicon
+├── logo_01informatica_retina.png  ← Logo footer
 ├── manifest.json            ← Configurazione PWA
-├── logo_01informatica_retina.png
 └── installazione.html       ← Guida installazione su smartphone
 ```
 
@@ -127,21 +175,18 @@ public/
 
 ```
 main.jsx
-  └── App.jsx (routing + tema + auth)
-        ├── LoginView.jsx     → usa supabase.js per auth
-        ├── DashboardView.jsx → usa supabase.js per leggere classifica
-        │                     → usa BrandLogo.jsx
-        ├── InsertWizardView.jsx → usa supabase.js per leggere regole e scrivere dati
-        │                        → usa ProgressRing.jsx
-        │                        → usa useToast.jsx per errori
-        └── SuccessView.jsx   → naviga a /dashboard
+  └── App.jsx (useAuth + useToast + routing + tema)
+        ├── LoginView        → supabase.auth
+        ├── DashboardView    → Navbar + Footer → supabase (classifica)
+        ├── InsertWizardView → Navbar + ProgressRing → supabase (regole + salvataggio)
+        ├── SuccessView      → naviga a /dashboard
+        ├── AccountView      → Navbar + Footer → supabase (password + storage avatar)
+        └── AdminView        → Navbar + Footer → supabase (CRUD tutto)
 ```
 
 ---
 
-## 7. Architettura Cloud e Variabili d'Ambiente
-
-### Configurazione Credenziali
+## 8. Variabili d'Ambiente
 
 Le credenziali Supabase sono in **variabili d'ambiente** (file `.env`):
 
@@ -152,21 +197,21 @@ VITE_APP_URL=https://servicescore.vercel.app
 ```
 
 - **In locale**: file `.env` nella root del progetto (escluso da Git)
-- **Su Vercel**: Settings → Environment Variables nella dashboard
+- **Su Vercel**: Settings → Environment Variables
 
 ---
 
-## 8. Strumenti Extra
+## 9. Strumenti Extra
 
 | File | Descrizione |
 |---|---|
-| `public/installazione.html` | Landing page per installare l'app su smartphone (Android/iOS) |
-| `genera-qr.js` | Genera QR code con colori brand 01Informatica (`npm run qr`) |
+| `public/installazione.html` | Landing page per installare l'app su smartphone |
+| `genera-qr.js` | Genera QR code con colori brand (`npm run qr`) |
 | `vercel.json` | Configurazione rewrite SPA per Vercel |
 
 ---
 
-## 9. Flusso di Lavoro Quotidiano
+## 10. Flusso di Lavoro Quotidiano
 
 ### Sviluppo Locale
 
@@ -174,14 +219,12 @@ VITE_APP_URL=https://servicescore.vercel.app
 npm run dev          # Avvia server locale con hot-reload
 ```
 
-Aprire http://localhost:5173 per vedere le modifiche in diretta.
-
 ### Deploy Online
 
 ```bash
-git add .                          # Prepara le modifiche
-git commit -m "messaggio descrittivo"   # Impacchetta
-git push origin main               # Invia → Vercel fa deploy automatico
+git add .
+git commit -m "messaggio descrittivo"
+git push origin main    # Vercel fa deploy automatico
 ```
 
 ### Script Disponibili
@@ -196,10 +239,42 @@ git push origin main               # Invia → Vercel fa deploy automatico
 
 ---
 
-## 10. Sicurezza
+## 11. Pannello Admin — Sezioni
 
-- **Autenticazione**: gestita da Supabase Auth (email/password)
+### Classifica
+Classifica completa di tutti i club senza filtri.
+
+### Club
+CRUD completo dei Lions Club (aggiungi, modifica nome, elimina).
+
+### Service
+CRUD dei tipi di Service (aggiungi, modifica nome, elimina).
+
+### Regole
+Gestione delle relazioni Service → Parametri → Range → Punti Max.
+Ogni regola definisce: per un certo tipo service, un certo parametro ha range min/max e punti max.
+
+### Utenti
+- **Crea utente**: inserisce username + ruolo nella tabella utenti
+- **Cambia ruolo**: admin ↔ referente
+- **Associa club**: toggle per collegare/scollegare un referente ai club
+- L'utente creato dall'admin deve poi registrarsi da solo (Crea Profilo) per ottenere le credenziali
+
+---
+
+## 12. Tema e Dark Mode
+
+- **3 modalità**: Chiaro, Scuro, Sistema (segue le preferenze del dispositivo)
+- **Persistenza**: la scelta viene salvata in localStorage
+- **Alto contrasto dark mode**: sfondo `#060D1F`, testo bianco, bordi visibili, input leggibili
+- **Toggle**: disponibile in tutte le pagine (navbar)
+
+---
+
+## 13. Sicurezza
+
+- **Autenticazione**: Supabase Auth (email/password)
 - **Row Level Security (RLS)**: configurata su Supabase per controllare l'accesso ai dati
-- **Zero Admin Panel**: nessun pannello web vulnerabile. Le regole e i dati vengono gestiti dal team di sviluppo tramite il pannello sicuro di Supabase
-- **Credenziali**: memorizzate come variabili d'ambiente, non nel codice sorgente
+- **Credenziali**: variabili d'ambiente, non nel codice sorgente
 - **HTTPS**: certificato SSL gratuito fornito da Vercel
+- **Storage**: bucket `avatars` public con policies per upload/lettura

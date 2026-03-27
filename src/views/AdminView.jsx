@@ -17,7 +17,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  Plus, Trash2, Edit3, Save, X, Trophy, Users, Building2, Layers, Settings,
+  Plus, Trash2, Edit3, Save, X, Trophy, Users, Building2, Layers, Settings, Activity,
   Link2, Unlink,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -56,7 +56,10 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
 
   // Nuovo utente
   const [newUsername, setNewUsername] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [newRuolo, setNewRuolo] = useState('referente');
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
 
   // =========================================================================
   // FETCH FUNCTIONS (prima del useEffect)
@@ -258,33 +261,52 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   };
 
   const createUser = async () => {
-    if (!newUsername.trim()) {
-      toast.error('Inserisci uno username');
-      return;
-    }
+    if (!newUsername.trim()) { toast.error('Inserisci uno username'); return; }
+    if (!newEmail.trim()) { toast.error('Inserisci un\'email'); return; }
+    if (newPassword.length < 6) { toast.error('La password deve avere almeno 6 caratteri'); return; }
+
+    setIsCreatingUser(true);
     try {
-      const newId = crypto.randomUUID();
-      const { error } = await supabase.from('utenti').insert({
-        id: newId,
-        username: newUsername.trim(),
-        password_hash: 'managed_by_supabase_auth',
-        ruolo: newRuolo,
+      // 1. Crea l'account in auth.users tramite signUp
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: newEmail.trim(),
+        password: newPassword,
+        options: { data: { full_name: newUsername.trim() } },
       });
-      if (error) {
-        if (error.code === '23505') {
-          toast.error('Username già esistente');
-        } else {
-          toast.error(error.message);
-        }
+
+      if (authError) {
+        toast.error('Errore auth: ' + authError.message);
+        setIsCreatingUser(false);
         return;
       }
-      toast.success(`Utente "${newUsername}" creato`);
+
+      // 2. Il trigger crea automaticamente il profilo in utenti.
+      //    Aggiorna il ruolo e lo username se necessario.
+      if (data?.user) {
+        await supabase.from('utenti').upsert({
+          id: data.user.id,
+          username: newUsername.trim(),
+          password_hash: 'managed_by_supabase_auth',
+          ruolo: newRuolo,
+        }, { onConflict: 'id' });
+      }
+
+      toast.success(`Utente "${newUsername}" creato con email ${newEmail}`);
       setNewUsername('');
+      setNewEmail('');
+      setNewPassword('');
       setNewRuolo('referente');
       fetchUsers();
+
+      // 3. L'admin è stato "loggato" come il nuovo utente.
+      //    Facciamo logout per tornare alla sessione admin.
+      //    L'admin dovrà fare login di nuovo.
+      await supabase.auth.signOut();
+
     } catch {
       toast.error('Errore creazione utente');
     }
+    setIsCreatingUser(false);
   };
 
   // =========================================================================
@@ -525,20 +547,28 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
               <div className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow">
                 Nuovo Utente
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input type="text" placeholder="Username" value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && createUser()}
                   className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none text-brand-dark dark:text-white border border-slate-200 dark:border-white/20" />
-                <select value={newRuolo} onChange={(e) => setNewRuolo(e.target.value)}
-                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
-                  <option value="referente">Referente</option>
-                  <option value="admin">Admin</option>
-                </select>
-                <button onClick={createUser}
-                  className="px-6 py-3 bg-brand-blue text-white rounded-xl font-black cursor-pointer border-none hover:shadow-xl active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2">
-                  <Plus size={16} /> Crea Utente
-                </button>
+                <input type="email" placeholder="Email" value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none text-brand-dark dark:text-white border border-slate-200 dark:border-white/20" />
+                <input type="password" placeholder="Password (min 6 caratteri)" value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  minLength={6} autoComplete="new-password"
+                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none text-brand-dark dark:text-white border border-slate-200 dark:border-white/20" />
+                <div className="flex gap-3">
+                  <select value={newRuolo} onChange={(e) => setNewRuolo(e.target.value)}
+                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                    <option value="referente">Referente</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <button onClick={createUser} disabled={isCreatingUser}
+                    className="px-6 py-3 bg-brand-blue text-white rounded-xl font-black cursor-pointer border-none hover:shadow-xl active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50">
+                    {isCreatingUser ? <Activity size={16} className="animate-spin" /> : <><Plus size={16} /> Crea</>}
+                  </button>
+                </div>
               </div>
             </div>
 
