@@ -194,7 +194,6 @@ export default function App() {
     setIsSubmitting(true);
     try {
       const { data: header, error: hErr } = await supabase.from('service_inseriti').insert({
-        id_utente: session.user.id, 
         id_club: Number(selectedClub), 
         id_tipo_service: Number(selectedService), 
         punteggio_totale: totalScore
@@ -203,6 +202,9 @@ export default function App() {
       if (hErr) {
         if (hErr.code === '23505') {
             throw new Error("Dati già esistenti. Questo club ha già registrato questo service.");
+        }
+        if (hErr.code === '23503') {
+            throw new Error("Errore di integrità: il Club o il Service selezionato non sono validi.");
         }
         throw hErr;
       }
@@ -220,7 +222,7 @@ export default function App() {
       setView('success');
       fetchLeaderboard();
     } catch (e) { 
-        alert("CONFLITTO RILEVATO:\n" + e.message + "\n\nSe la classifica sembra vuota ma ricevi questo errore, controlla le policies SELECT su Supabase."); 
+        alert("ATTENZIONE:\n" + e.message); 
     }
     finally { setIsSubmitting(false); }
   };
@@ -293,7 +295,7 @@ export default function App() {
         {!confirmationSent ? (
           <>
             <BrandLogo className="h-14 sm:h-20 mb-10" />
-            <h1 className="text-2xl font-black text-brand-blue dark:text-white uppercase tracking-tighter mb-1 text-center">
+            <h1 className="text-2xl font-black text-brand-blue dark:text-white uppercase tracking-tighter mb-1 text-center font-black">
                 {authMode === 'login' ? 'Area Riservata' : 'Registrazione'}
             </h1>
             <p className="text-center text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-[0.4em] mb-10 font-bold italic">
@@ -352,7 +354,7 @@ export default function App() {
            <div className="relative z-10 text-center sm:text-left">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red dark:text-brand-yellow mb-3 font-bold">Lions District Network</h2>
               <h1 className="text-4xl lg:text-5xl font-black tracking-tighter mb-10 uppercase">Classifica Club</h1>
-              <button onClick={() => {setView('insert'); setStep(1); setFormValues({}); setSelectedService('');}} className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-10 py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover:scale-105 transition-all text-lg border-none font-bold"><Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1"/> NUOVA ANALISI</button>
+              <button onClick={() => {setView('insert'); setStep(1); setFormValues({}); setSelectedService('');}} className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-10 py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover:scale-105 transition-all text-lg border-none font-bold font-black"><Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1"/> NUOVA ANALISI</button>
            </div>
         </div>
         <div className="space-y-6">
@@ -412,32 +414,32 @@ export default function App() {
                   <div className="space-y-3"><label className="text-xs font-black uppercase tracking-widest text-brand-blue/60 dark:text-brand-yellow ml-2 font-bold">Lions Club Referente</label><div className="relative text-brand-dark dark:text-white"><select value={selectedClub} onChange={e=>setSelectedClub(e.target.value)} className="w-full cursor-pointer p-6 bg-slate-100 dark:bg-brand-dark border border-slate-200 dark:border-white/10 rounded-[2.5rem] text-lg font-bold outline-none focus:ring-4 focus:ring-brand-yellow/20 appearance-none shadow-inner"><option value="">Seleziona Club...</option>{clubs.map(c=><option key={c.id} value={c.id}>{c.nome}</option>)}</select><div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 dark:text-white font-bold"><ArrowRight size={20} className="rotate-90"/></div></div></div>
                   <div className="space-y-3"><label className="text-xs font-black uppercase tracking-widest text-brand-red ml-2 font-bold">Categoria Progetto</label><div className="relative text-brand-dark dark:text-white"><select value={selectedService} onChange={e=>setSelectedService(e.target.value)} className="w-full cursor-pointer p-6 bg-slate-100 dark:bg-brand-dark border border-slate-200 dark:border-white/10 rounded-[2.5rem] text-lg font-bold outline-none focus:ring-4 focus:ring-brand-red/20 appearance-none shadow-inner"><option value="">Seleziona Service...</option>{serviceTypes.map(s=><option key={s.id} value={s.id}>{s.nome}</option>)}</select><div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 dark:text-white font-bold"><ArrowRight size={20} className="rotate-90"/></div></div></div>
                 </div>
-                <button onClick={() => setStep(2)} disabled={!selectedClub || !selectedService || isSubmitting} className="w-full cursor-pointer py-7 bg-brand-blue text-white font-black rounded-[2.5rem] uppercase tracking-widest text-xl hover:shadow-2xl hover:scale-[1.02] disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-3 border-none font-bold">CONTINUA <ArrowRight size={24}/></button>
+                <button onClick={() => setStep(2)} disabled={!selectedClub || !selectedService || isSubmitting} className="w-full cursor-pointer py-7 bg-brand-blue text-white font-black rounded-[2.5rem] uppercase tracking-widest text-xl hover:shadow-2xl hover:scale-[1.02] disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-3 border-none font-bold font-black">CONTINUA <ArrowRight size={24}/></button>
               </div>
             )}
             {step === 2 && (
               <div className="space-y-12 animate-in fade-in slide-in-from-right-8 duration-500">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 text-center sm:text-left"><div className="space-y-2"><h2 className="text-4xl font-black uppercase tracking-tighter text-brand-red dark:text-brand-yellow leading-none text-balance font-bold">Dati Operativi</h2><p className="text-slate-600 dark:text-slate-400 font-medium italic text-base font-bold">Sincronizzazione parametri.</p></div><div className="px-6 py-3 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 text-brand-blue dark:text-brand-yellow text-[10px] font-black uppercase tracking-widest shadow-sm border-slate-200">{serviceTypes.find(s=>s.id===Number(selectedService))?.nome}</div></div>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 text-center sm:text-left"><div className="space-y-2"><h2 className="text-4xl font-black uppercase tracking-tighter text-brand-red dark:text-brand-yellow leading-none text-balance font-bold font-black text-bold">Dati Operativi</h2><p className="text-slate-600 dark:text-slate-400 font-medium italic text-base font-bold font-bold">Sincronizzazione parametri.</p></div><div className="px-6 py-3 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 text-brand-blue dark:text-brand-yellow text-[10px] font-black uppercase tracking-widest shadow-sm border-slate-200">{serviceTypes.find(s=>s.id===Number(selectedService))?.nome}</div></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 px-1 text-brand-dark dark:text-white font-bold">
                   {currentRules.map(rule => {
                     const p = parameters.find(x => x.id === rule.id_parametro);
                     const err = formErrors[rule.id_parametro];
                     return (
                       <div key={rule.id} className="p-8 bg-white dark:bg-white/5 rounded-[3rem] border border-slate-200 dark:border-white/10 hover:border-brand-blue/30 transition-all shadow-md group">
-                        <div className="flex justify-between items-start mb-6"><div className="flex flex-col"><span className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1 font-bold">{p?.nome}</span><span className="text-[10px] font-black text-brand-red dark:text-brand-yellow uppercase font-bold">Limite: {rule.range_max}</span></div><Activity size={18} className="text-brand-blue/20 dark:text-white/10 group-hover:text-brand-yellow transition-colors" /></div>
+                        <div className="flex justify-between items-start mb-6"><div className="flex flex-col"><span className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1 font-bold font-bold">{p?.nome}</span><span className="text-[10px] font-black text-brand-red dark:text-brand-yellow uppercase font-bold font-bold">Limite: {rule.range_max}</span></div><Activity size={18} className="text-brand-blue/20 dark:text-white/10 group-hover:text-brand-yellow transition-colors" /></div>
                         <input type="number" placeholder="0" value={formValues[rule.id_parametro] || ''} onChange={e=>handleInputChange(rule.id_parametro, e.target.value, rule)}
-                          className={`w-full bg-transparent text-5xl font-black outline-none border-b-4 transition-all pb-2 cursor-text text-brand-blue dark:text-white font-bold ${err ? 'border-brand-red text-brand-red' : 'border-slate-100 dark:border-white/10 focus:border-brand-blue'}`} />
-                        {err && <div className="text-[9px] font-black text-brand-red uppercase mt-3 flex items-center gap-1 font-bold"><AlertCircle size={12}/> {err}</div>}
+                          className={`w-full bg-transparent text-5xl font-black outline-none border-b-4 transition-all pb-2 cursor-text text-brand-blue dark:text-white font-bold font-bold ${err ? 'border-brand-red text-brand-red' : 'border-slate-100 dark:border-white/10 focus:border-brand-blue'}`} />
+                        {err && <div className="text-[9px] font-black text-brand-red uppercase mt-3 flex items-center gap-1 font-bold font-bold"><AlertCircle size={12}/> {err}</div>}
                       </div>
                     );
                   })}
                 </div>
-                <div className="flex gap-4 fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-50 font-bold"><button onClick={() => setStep(1)} className="flex-1 cursor-pointer py-5 bg-white dark:bg-brand-dark border border-slate-300 dark:border-white/20 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl active:scale-90 transition-transform text-brand-blue dark:text-white border-none font-bold">INDIETRO</button><button onClick={() => setStep(3)} disabled={Object.keys(formErrors).length > 0 || isSubmitting} className="flex-[2] cursor-pointer bg-brand-blue text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:scale-105 active:scale-95 transition-all font-bold border-none disabled:opacity-50">CONFERMA</button></div>
+                <div className="flex gap-4 fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-50 font-bold font-bold"><button onClick={() => setStep(1)} className="flex-1 cursor-pointer py-5 bg-white dark:bg-brand-dark border border-slate-300 dark:border-white/20 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl active:scale-90 transition-transform text-brand-blue dark:text-white border-none font-bold">INDIETRO</button><button onClick={() => setStep(3)} disabled={Object.keys(formErrors).length > 0 || isSubmitting} className="flex-[2] cursor-pointer bg-brand-blue text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:scale-105 active:scale-95 transition-all font-bold border-none disabled:opacity-50">CONFERMA</button></div>
               </div>
             )}
             {step === 3 && (
               <div className="space-y-12 animate-in fade-in zoom-in duration-500 text-center">
-                <div className="space-y-4"><div className="w-24 h-24 bg-brand-yellow/10 rounded-[2.5rem] flex items-center justify-center mx-auto text-brand-blue dark:text-brand-yellow shadow-inner animate-pulse"><ShieldCheck size={52} /></div><h2 className="text-5xl font-black uppercase tracking-tighter text-brand-blue dark:text-white leading-none">Riepilogo Dati</h2><p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto font-medium text-base font-bold italic">Verifica i parametri acquisiti.</p></div>
+                <div className="space-y-4"><div className="w-24 h-24 bg-brand-yellow/10 rounded-[2.5rem] flex items-center justify-center mx-auto text-brand-blue dark:text-brand-yellow shadow-inner animate-pulse"><ShieldCheck size={52} /></div><h2 className="text-5xl font-black uppercase tracking-tighter text-brand-blue dark:text-white leading-none">Riepilogo Dati</h2><p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto font-medium text-base font-bold font-bold italic">Verifica i parametri acquisiti.</p></div>
                 <div className="bg-white dark:bg-white/5 p-14 rounded-[4rem] border border-slate-200 dark:border-white/10 shadow-2xl space-y-10 relative overflow-hidden group">
                    <div className="absolute top-0 right-0 p-8 text-brand-blue/5 dark:text-white/5 -rotate-12"><Cpu size={120}/></div>
                    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pb-8 border-b border-slate-100 dark:border-white/5 relative z-10 text-balance font-bold text-brand-dark dark:text-white">
@@ -448,7 +450,7 @@ export default function App() {
                       {currentRules.map(rule => (<div key={rule.id} className="text-center p-4 bg-slate-50 dark:bg-black/30 rounded-2xl border border-slate-200 dark:border-white/5 shadow-inner transition-colors font-bold"><div className="text-[8px] font-black text-slate-500 dark:text-slate-500 uppercase mb-2 truncate px-1 font-bold">{parameters.find(p=>p.id===rule.id_parametro)?.nome}</div><div className="text-xl font-black font-bold">{formValues[rule.id_parametro] || 0}</div></div>))}
                    </div>
                 </div>
-                <div className="flex flex-col gap-6 max-w-sm mx-auto pb-10 px-4 font-bold"><button onClick={handleSave} disabled={isSubmitting} className="w-full cursor-pointer py-8 bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow text-white font-black rounded-[2.5rem] uppercase tracking-[0.2em] text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all font-bold border-none disabled:opacity-50">REGISTRA</button><button onClick={() => setStep(2)} className="text-slate-500 dark:text-slate-400 font-black uppercase text-xs hover:text-brand-blue dark:hover:text-brand-yellow transition-colors cursor-pointer active:scale-90 p-2 font-bold underline underline-offset-8">Modifica Parametri</button></div>
+                <div className="flex flex-col gap-6 max-w-sm mx-auto pb-10 px-4 font-bold"><button onClick={handleSave} disabled={isSubmitting} className="w-full cursor-pointer py-8 bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow text-white font-black rounded-[2.5rem] uppercase tracking-[0.2em] text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all font-bold border-none disabled:opacity-50 font-black">REGISTRA</button><button onClick={() => setStep(2)} className="text-slate-500 dark:text-slate-400 font-black uppercase text-xs hover:text-brand-blue dark:hover:text-brand-yellow transition-colors cursor-pointer active:scale-90 p-2 font-bold underline underline-offset-8">Modifica Parametri</button></div>
               </div>
             )}
           </div>
@@ -462,9 +464,9 @@ export default function App() {
     <div className={`min-h-screen flex flex-col items-center justify-center p-8 text-center transition-all duration-500 relative overflow-hidden ${resolvedTheme === 'dark' ? 'bg-[#0B132B]' : 'bg-slate-100'}`}>
       <div className="absolute inset-0 bg-radial-gradient from-brand-yellow/10 to-transparent opacity-30 animate-pulse font-bold"></div>
       <div className="bg-gradient-to-br from-[#0033A0] via-[#E31837] to-[#FFC72C] p-16 rounded-[5rem] animate-bounce shadow-2xl mb-12 relative z-10 border-4 border-white/20"><CheckCircle2 size={120} className="text-white drop-shadow-2xl" /></div>
-      <h1 className="text-7xl font-black text-brand-blue dark:text-white tracking-tighter mb-6 uppercase leading-none relative z-10 italic">MISSIONE<br/><span className="text-brand-yellow">COMPLETATA</span></h1>
-      <p className="text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.5em] mb-16 relative z-10 text-sm font-bold italic">DATABASE AGGIORNATO</p>
-      <button onClick={() => setView('dashboard')} className="px-24 py-8 bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black rounded-[3rem] uppercase tracking-widest text-xl hover:shadow-2xl active:scale-95 transition-all cursor-pointer relative z-10 font-bold border-none">DASHBOARD</button>
+      <h1 className="text-7xl font-black text-brand-blue dark:text-white tracking-tighter mb-6 uppercase leading-none relative z-10 italic font-black">MISSIONE<br/><span className="text-brand-yellow">COMPLETATA</span></h1>
+      <p className="text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.5em] mb-16 relative z-10 text-sm font-bold italic font-bold">DATABASE AGGIORNATO</p>
+      <button onClick={() => setView('dashboard')} className="px-24 py-8 bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black rounded-[3rem] uppercase tracking-widest text-xl hover:shadow-2xl active:scale-95 transition-all cursor-pointer relative z-10 font-bold border-none font-bold">DASHBOARD</button>
     </div>
   );
 }
