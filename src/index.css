@@ -28,7 +28,73 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-/* Animazioni fluide per il cambio tema */
+/* Animazioni fluidi per il cambio tema */
 * {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+}
+
+/* =============================================================================
+   DARK MODE - ALTO CONTRASTO
+   ============================================================================= */
+
+/* Sfondo principale dark: più scuro per massimo contrasto */
+.dark body {
+  background-color: #060D1F;
+  color: #FFFFFF;
+}
+
+/* Card e contenitori dark */
+.dark .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .bg-white\/\[0\.06\] {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Bordi dark: più visibili */
+.dark .border-white\/10 {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .border-white\/15 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Testo placeholder dark: più leggibile */
+.dark ::placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Input dark: sfondo più visibile */
+.dark input,
+.dark select {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+.dark input:focus,
+.dark select:focus {
+  border-color: #FFC72C !important;
+  box-shadow: 0 0 0 2px rgba(255, 199, 44, 0.3) !important;
+}
+
+/* Testo secondario dark: più leggibile */
+.dark .text-slate-400 {
+  color: #94A3B8 !important;
+}
+
+.dark .text-slate-500 {
+  color: #8896AB !important;
+}
+
+/* Pulsanti dark: più contrasto */
+.dark button {
+  color: #FFFFFF;
+}
+
+/* Navbar dark: più definita */
+.dark nav {
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
 }
