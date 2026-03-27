@@ -1,16 +1,6 @@
 // =============================================================================
 // HOOK: useAuth - Gestisce stato utente, ruolo e club associati
 // =============================================================================
-// Dopo il login con Supabase Auth, questo hook:
-// 1. Legge il profilo utente dalla tabella 'utenti' (ruolo, username)
-// 2. Se referente: legge i club associati dalla tabella 'utenti_club'
-// 3. Espone: user, isAdmin, userClubs, loading, refresh
-//
-// COLLEGAMENTI:
-// - Usato in App.jsx per decidere quali route mostrare
-// - Usato in DashboardView per filtrare la classifica
-// - Usato in InsertWizardView per filtrare i club
-// =============================================================================
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
@@ -50,11 +40,12 @@ export default function useAuth() {
 
   const loadUserProfile = async (userId) => {
     try {
+      // Usa maybeSingle() per non fallire se il profilo non esiste
       const { data: profile, error: profileErr } = await supabase
         .from('utenti')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (profileErr) {
         console.error('Errore caricamento profilo:', profileErr);
@@ -62,8 +53,32 @@ export default function useAuth() {
         return;
       }
 
+      // Se il profilo non esiste, crealo automaticamente
+      if (!profile) {
+        const { data: newProfile, error: insertErr } = await supabase
+          .from('utenti')
+          .insert({
+            id: userId,
+            username: 'nuovo_utente',
+            password_hash: 'managed_by_supabase_auth',
+            ruolo: 'referente',
+          })
+          .select()
+          .single();
+
+        if (insertErr) {
+          console.error('Errore creazione profilo:', insertErr);
+          setLoading(false);
+          return;
+        }
+        setUserProfile(newProfile);
+        setLoading(false);
+        return;
+      }
+
       setUserProfile(profile);
 
+      // Se non è admin, carica i club associati
       if (profile && profile.ruolo !== 'admin') {
         const { data: clubs, error: clubsErr } = await supabase
           .from('utenti_club')
