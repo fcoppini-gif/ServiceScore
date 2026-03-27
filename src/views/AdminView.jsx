@@ -54,6 +54,10 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   const [allUsers, setAllUsers] = useState([]);
   const [allClubs, setAllClubs] = useState([]);
 
+  // Nuovo utente
+  const [newUsername, setNewUsername] = useState('');
+  const [newRuolo, setNewRuolo] = useState('referente');
+
   // =========================================================================
   // FETCH FUNCTIONS (prima del useEffect)
   // =========================================================================
@@ -251,6 +255,36 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
       toast.error('Errore aggiornamento ruolo');
     }
     fetchUsers();
+  };
+
+  const createUser = async () => {
+    if (!newUsername.trim()) {
+      toast.error('Inserisci uno username');
+      return;
+    }
+    try {
+      const newId = crypto.randomUUID();
+      const { error } = await supabase.from('utenti').insert({
+        id: newId,
+        username: newUsername.trim(),
+        password_hash: 'managed_by_supabase_auth',
+        ruolo: newRuolo,
+      });
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Username già esistente');
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
+      toast.success(`Utente "${newUsername}" creato`);
+      setNewUsername('');
+      setNewRuolo('referente');
+      fetchUsers();
+    } catch {
+      toast.error('Errore creazione utente');
+    }
   };
 
   // =========================================================================
@@ -486,6 +520,29 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
         {/* UTENTI */}
         {section === 'utenti' && (
           <div className="space-y-6">
+            {/* Form creazione utente */}
+            <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20 shadow-sm space-y-4">
+              <div className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow">
+                Nuovo Utente
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input type="text" placeholder="Username" value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && createUser()}
+                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none text-brand-dark dark:text-white border border-slate-200 dark:border-white/20" />
+                <select value={newRuolo} onChange={(e) => setNewRuolo(e.target.value)}
+                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                  <option value="referente">Referente</option>
+                  <option value="admin">Admin</option>
+                </select>
+                <button onClick={createUser}
+                  className="px-6 py-3 bg-brand-blue text-white rounded-xl font-black cursor-pointer border-none hover:shadow-xl active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                  <Plus size={16} /> Crea Utente
+                </button>
+              </div>
+            </div>
+
+            {/* Lista utenti esistenti */}
             {allUsers.map((u) => (
               <div key={u.id} className="bg-white dark:bg-white/[0.06] rounded-[2rem] border border-slate-200 dark:border-white/15 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between p-6">

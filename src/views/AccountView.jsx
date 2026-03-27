@@ -17,7 +17,10 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatar_url || null);
+
+  // Legge l'avatar dal profilo globale (aggiornato dopo refresh)
+  // Fallback locale solo per anteprima immediata dopo upload
+  const avatarUrl = userProfile?.avatar_url || null;
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -65,7 +68,6 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
 
       if (updateError) throw updateError;
 
-      setAvatarUrl(publicUrl);
       toast.success('Avatar aggiornato');
       refresh?.();
     } catch (err) {
