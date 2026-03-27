@@ -1,19 +1,7 @@
 // =============================================================================
 // COMPONENTE PRINCIPALE - Entry point dell'applicazione React
 // =============================================================================
-// Questo file:
-// 1. Avvolge tutto in BrowserRouter per il routing
-// 2. Usa useAuth per gestire autenticazione + ruolo + club associati
-// 3. Gestisce il tema chiaro/scuro/sistema
-// 4. Definisce le route: /login, /dashboard, /insert, /success, /account, /admin/:section
-//
-// COLLEGAMENTI:
-// - useAuth (src/hooks/useAuth.jsx) → legge profilo utente e club
-// - useToast (src/hooks/useToast.jsx) → notifiche toast
-// - Tutte le view in src/views/
-// =============================================================================
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth';
 import useToast from './hooks/useToast';
@@ -26,14 +14,12 @@ import AccountView from './views/AccountView';
 import AdminView from './views/AdminView';
 
 function AppContent() {
-  const { user, userProfile, isAdmin, userClubs, loading } = useAuth();
+  const { user, userProfile, isAdmin, userClubs, loading, refresh } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system');
   const [resolvedTheme, setResolvedTheme] = useState('dark');
   const { toast, ToastContainer } = useToast();
 
-  // =========================================================================
-  // GESTIONE TEMA
-  // =========================================================================
+  // Gestione tema
   useEffect(() => {
     const root = window.document.documentElement;
     const body = window.document.body;
@@ -45,7 +31,7 @@ function AppContent() {
       setResolvedTheme(current);
       if (current === 'dark') {
         root.classList.add('dark');
-        body.style.backgroundColor = '#0B132B';
+        body.style.backgroundColor = '#060D1F';
         body.style.color = '#ffffff';
       } else {
         root.classList.remove('dark');
@@ -61,19 +47,20 @@ function AppContent() {
     return () => mediaQuery.removeEventListener('change', listener);
   }, [theme]);
 
-  const ThemeSwitcherWrapper = () => (
-    <ThemeSwitcher theme={theme} onThemeChange={setTheme} />
+  // Memoizzo il ThemeSwitcherWrapper per evitare re-mount
+  const ThemeSwitcherWrapper = useMemo(
+    () => () => <ThemeSwitcher theme={theme} onThemeChange={setTheme} />,
+    [theme]
   );
 
-  // Spinner durante caricamento auth
   if (loading)
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-slate-100 dark:bg-[#0B132B]">
+      <div className="h-screen flex flex-col items-center justify-center bg-slate-100 dark:bg-[#060D1F]">
         <div className="w-16 h-16 border-4 border-[#0033A0] border-t-[#FFC72C] rounded-full animate-spin"></div>
       </div>
     );
 
-  // Helper: props comuni per tutte le view autenticate
+  // Props comuni per tutte le view autenticate
   const authProps = {
     isAdmin,
     userClubs,
@@ -81,65 +68,31 @@ function AppContent() {
     resolvedTheme,
     ThemeSwitcher: ThemeSwitcherWrapper,
     toast,
+    refresh,
   };
 
   return (
     <>
       <ToastContainer />
       <Routes>
-        {/* LOGIN - accessibile solo se NON loggato */}
-        <Route
-          path="/login"
-          element={
-            user ? <Navigate to="/dashboard" replace /> : <LoginView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
-          }
-        />
-
-        {/* DASHBOARD - classifica (filtrata per referente, completa per admin) */}
-        <Route
-          path="/dashboard"
-          element={
-            user ? <DashboardView {...authProps} /> : <Navigate to="/login" replace />
-          }
-        />
-
-        {/* INSERT - wizard inserimento (solo club associati se referente) */}
-        <Route
-          path="/insert"
-          element={
-            user ? <InsertWizardView {...authProps} /> : <Navigate to="/login" replace />
-          }
-        />
-
-        {/* SUCCESS - conferma salvataggio */}
-        <Route
-          path="/success"
-          element={
-            user ? <SuccessView resolvedTheme={resolvedTheme} /> : <Navigate to="/login" replace />
-          }
-        />
-
-        {/* ACCOUNT - cambio password + avatar (tutti gli utenti) */}
-        <Route
-          path="/account"
-          element={
-            user ? <AccountView {...authProps} /> : <Navigate to="/login" replace />
-          }
-        />
-
-        {/* ADMIN - pannello amministrazione (solo admin) */}
-        <Route
-          path="/admin/:section?"
-          element={
-            user ? (
-              isAdmin ? <AdminView {...authProps} /> : <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        {/* Catch-all */}
+        <Route path="/login" element={
+          user ? <Navigate to="/dashboard" replace /> : <LoginView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
+        } />
+        <Route path="/dashboard" element={
+          user ? <DashboardView {...authProps} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/insert" element={
+          user ? <InsertWizardView {...authProps} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/success" element={
+          user ? <SuccessView resolvedTheme={resolvedTheme} toast={toast} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/account" element={
+          user ? <AccountView {...authProps} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/admin/:section?" element={
+          user ? (isAdmin ? <AdminView {...authProps} /> : <Navigate to="/dashboard" replace />) : <Navigate to="/login" replace />
+        } />
         <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
       </Routes>
     </>

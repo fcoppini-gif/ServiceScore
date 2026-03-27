@@ -4,11 +4,7 @@
 // Dopo il login con Supabase Auth, questo hook:
 // 1. Legge il profilo utente dalla tabella 'utenti' (ruolo, username)
 // 2. Se referente: legge i club associati dalla tabella 'utenti_club'
-// 3. Espone: user, isAdmin, userClubs, loading
-//
-// UTILIZZO:
-//   const { user, isAdmin, userClubs, loading } = useAuth();
-//   if (isAdmin) { /* mostra pannello admin */ }
+// 3. Espone: user, isAdmin, userClubs, loading, refresh
 //
 // COLLEGAMENTI:
 // - Usato in App.jsx per decidere quali route mostrare
@@ -26,7 +22,6 @@ export default function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Carica la sessione iniziale
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
@@ -36,7 +31,6 @@ export default function useAuth() {
       }
     });
 
-    // Listener per cambiamenti auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {
@@ -54,28 +48,35 @@ export default function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // ===========================================================================
-  // loadUserProfile: Legge il profilo da 'utenti' e i club associati
-  // ===========================================================================
   const loadUserProfile = async (userId) => {
     try {
-      // Leggi il profilo utente (ruolo, username)
-      const { data: profile } = await supabase
+      const { data: profile, error: profileErr } = await supabase
         .from('utenti')
         .select('*')
         .eq('id', userId)
         .single();
 
+      if (profileErr) {
+        console.error('Errore caricamento profilo:', profileErr);
+        setLoading(false);
+        return;
+      }
+
       setUserProfile(profile);
 
-      // Se non è admin, carica i club associati
       if (profile && profile.ruolo !== 'admin') {
-        const { data: clubs } = await supabase
+        const { data: clubs, error: clubsErr } = await supabase
           .from('utenti_club')
           .select('id_club')
           .eq('id_utente', userId);
 
-        setUserClubs(clubs?.map((c) => c.id_club) || []);
+        if (clubsErr) {
+          console.error('Errore caricamento club:', clubsErr);
+        } else {
+          setUserClubs(clubs?.map((c) => c.id_club) || []);
+        }
+      } else {
+        setUserClubs([]);
       }
     } catch (err) {
       console.error('Errore caricamento profilo:', err);
@@ -84,7 +85,6 @@ export default function useAuth() {
     }
   };
 
-  // isAdmin: true se il ruolo è 'admin'
   const isAdmin = userProfile?.ruolo === 'admin';
 
   return {
@@ -93,7 +93,6 @@ export default function useAuth() {
     isAdmin,
     userClubs,
     loading,
-    // refresh: ricarica il profilo (dopo cambio password, avatar, ecc.)
     refresh: () => user && loadUserProfile(user.id),
   };
 }

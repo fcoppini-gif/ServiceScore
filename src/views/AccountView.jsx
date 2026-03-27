@@ -17,7 +17,7 @@ import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
-export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast }) {
+export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast, refresh }) {
   // Stati cambio password
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -49,6 +49,7 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
       toast.success('Password aggiornata con successo');
       setNewPassword('');
       setConfirmPassword('');
+      refresh();
     }
     setIsChangingPassword(false);
   };
@@ -102,6 +103,7 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
 
       setAvatarUrl(publicUrl);
       toast.success('Avatar aggiornato');
+      refresh();
     } catch (err) {
       toast.error('Errore upload: ' + err.message);
     } finally {

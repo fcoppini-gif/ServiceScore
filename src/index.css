@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 /* Definizione del tema personalizzato 01Informatica per Tailwind v4 */
 @theme {
@@ -28,8 +29,8 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-/* Animazioni fluidi per il cambio tema */
-* {
+/* Animazioni fluide per cambio tema (escludo SVG per non interferire con ProgressRing) */
+*:not(svg):not(path):not(circle):not(line):not(g) {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
 }
 
@@ -37,36 +38,26 @@ input::-webkit-inner-spin-button {
    DARK MODE - ALTO CONTRASTO
    ============================================================================= */
 
-/* Sfondo principale dark: più scuro per massimo contrasto */
-.dark body {
-  background-color: #060D1F;
-  color: #FFFFFF;
-}
-
-/* Card e contenitori dark */
-.dark .bg-white\/5 {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.dark .bg-white\/\[0\.06\] {
-  background-color: rgba(255, 255, 255, 0.08) !important;
+/* Testo brand-dark: in dark mode diventa bianco */
+.dark .text-brand-dark {
+  color: #FFFFFF !important;
 }
 
 /* Bordi dark: più visibili */
 .dark .border-white\/10 {
-  border-color: rgba(255, 255, 255, 0.18) !important;
-}
-
-.dark .border-white\/15 {
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
-/* Testo placeholder dark: più leggibile */
+.dark .border-white\/15 {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Testo placeholder dark: leggibile */
 .dark ::placeholder {
   color: rgba(255, 255, 255, 0.45) !important;
 }
 
-/* Input dark: sfondo più visibile */
+/* Input/select dark: sfondo scuro e testo bianco */
 .dark input,
 .dark select {
   background-color: rgba(0, 0, 0, 0.5) !important;
@@ -80,7 +71,7 @@ input::-webkit-inner-spin-button {
   box-shadow: 0 0 0 2px rgba(255, 199, 44, 0.3) !important;
 }
 
-/* Testo secondario dark: più leggibile */
+/* Testo secondario dark */
 .dark .text-slate-400 {
   color: #94A3B8 !important;
 }
@@ -89,12 +80,7 @@ input::-webkit-inner-spin-button {
   color: #8896AB !important;
 }
 
-/* Pulsanti dark: più contrasto */
-.dark button {
-  color: #FFFFFF;
-}
-
-/* Navbar dark: più definita */
+/* Navbar dark */
 .dark nav {
   border-bottom-color: rgba(255, 255, 255, 0.12) !important;
 }
