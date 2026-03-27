@@ -2,10 +2,33 @@
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0033A0"/>
-      <stop offset="50%" stop-color="#E31837"/>
+      <stop offset="60%" stop-color="#E31837"/>
       <stop offset="100%" stop-color="#FFC72C"/>
     </linearGradient>
+    <linearGradient id="shield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFC72C"/>
+      <stop offset="100%" stop-color="#E31837"/>
+    </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="120" fill="url(#bg)"/>
-  <text x="256" y="300" font-family="Arial Black, sans-serif" font-size="140" font-weight="900" fill="white" text-anchor="middle" dominant-baseline="middle">SS</text>
+
+  <!-- Sfondo rotondo con gradiente -->
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+
+  <!-- Scudo centrale -->
+  <g transform="translate(256,256)">
+    <!-- Forma scudo -->
+    <path d="M0,-160 L120,-100 L120,40 Q120,140 0,180 Q-120,140 -120,40 L-120,-100 Z"
+          fill="none" stroke="url(#shield)" stroke-width="8" opacity="0.9"/>
+    <path d="M0,-160 L120,-100 L120,40 Q120,140 0,180 Q-120,140 -120,40 L-120,-100 Z"
+          fill="white" opacity="0.15"/>
+
+    <!-- SS in grassetto -->
+    <text x="0" y="30" font-family="Arial Black, Helvetica, sans-serif"
+          font-size="150" font-weight="900" fill="white"
+          text-anchor="middle" dominant-baseline="middle"
+          letter-spacing="-8">SS</text>
+  </g>
+
+  <!-- Punto decorativo in basso -->
+  <circle cx="256" cy="430" r="12" fill="#FFC72C" opacity="0.8"/>
 </svg>

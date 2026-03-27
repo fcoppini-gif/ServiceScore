@@ -1,3 +1,31 @@
+// =============================================================================
+// VIEW: InsertWizardView - Wizard a 3 step per inserire una nuova valutazione
+// =============================================================================
+// STEP 1 (Configura): Selezione Club + Tipo Service
+//   → Legge da tabelle 'club' e 'tipi_service'
+//   → Pulsante "CONTINUA" abilitato solo se entrambi selezionati
+//
+// STEP 2 (Dati Operativi): Inserimento valori per ogni parametro
+//   → I parametri vengono da 'regole_calcolo' filtrati per id_tipo_service
+//   → Ogni input ha validazione range (min/max) con errore inline
+//   → ProgressRing e barre laterali aggiornate in tempo reale
+//   → Pulsante "CONFERMA" abilitato solo se tutti i campi sono compilati e senza errori
+//
+// STEP 3 (Riepilogo): Mostra punteggio calcolato e conferma salvataggio
+//   → Pulsante "REGISTRA" salva su Supabase (service_inseriti + dettaglio_inserimenti)
+//
+// FORMULA SCORING:
+//   punti_ottenuti = (valore_inserito / range_max) * punti_max
+//   punteggio_totale = somma di tutti i punti_ottenuti
+//
+// COLLEGAMENTI:
+// - Usa supabase per leggere club, tipi_service, parametri, regole_calcolo
+// - Usa supabase per scrivere su service_inseriti e dettaglio_inserimenti
+// - Usa ProgressRing per mostrare il punteggio circolare animato
+// - Usa toast per mostrare errori di salvataggio
+// - Alla fine naviga a /success
+// =============================================================================
+
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,17 +36,26 @@ import ProgressRing from '../components/ProgressRing';
 
 export default function InsertWizardView({ resolvedTheme, toast }) {
   const navigate = useNavigate();
+  // step: 1=selezione, 2=dati, 3=riepilogo
   const [step, setStep] = useState(1);
+  // Dati tabelle (caricati una volta al mount)
   const [clubs, setClubs] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [parameters, setParameters] = useState([]);
   const [allRules, setAllRules] = useState([]);
+  // Selezione utente
   const [selectedClub, setSelectedClub] = useState('');
   const [selectedService, setSelectedService] = useState('');
+  // Form: {id_parametro: valore_numerico}
   const [formValues, setFormValues] = useState({});
+  // Errori validazione: {id_parametro: "messaggio errore"}
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ===========================================================================
+  // useEffect: Carica dati iniziali dal database
+  // Carica 4 tabelle in parallelo: club, tipi_service, parametri, regole_calcolo
+  // ===========================================================================
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -34,18 +71,30 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
     setAllRules(rules || []);
   }
 
+  // ===========================================================================
+  // useMemo: Calcoli derivati (ricalcolati solo quando cambiano le dipendenze)
+  // ===========================================================================
+
+  // currentRules: filtra le regole per il tipo service selezionato
+  // Ogni regola dice "per questo parametro, in questo service, range è X e punti_max è Y"
   const currentRules = useMemo(
     () => allRules.filter((r) => r.id_tipo_service === Number(selectedService)),
     [selectedService, allRules]
   );
+
+  // maxPossibleScore: punteggio massimo ottenibile (somma di tutti i punti_max)
   const maxPossibleScore = useMemo(
     () => currentRules.reduce((sum, r) => sum + r.punti_max, 0),
     [currentRules]
   );
+
+  // totalScore: punteggio calcolato in tempo reale
+  // Formula: (valore / range_max) * punti_max per ogni parametro
   const totalScore = useMemo(() => {
     let total = 0;
     currentRules.forEach((rule) => {
       const val = formValues[rule.id_parametro];
+      // Considera il campo solo se ha un valore, non è vuoto, e non ha errori
       if (val !== undefined && val !== '' && !formErrors[rule.id_parametro]) {
         total += (Number(val) / rule.range_max) * rule.punti_max;
       }
@@ -53,6 +102,8 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
     return total;
   }, [formValues, currentRules, formErrors]);
 
+  // allFieldsFilled: true se tutti i parametri hanno un valore inserito
+  // Usato per abilitare/disabilitare il pulsante CONFERMA
   const allFieldsFilled = useMemo(() => {
     if (currentRules.length === 0) return false;
     return currentRules.every(
@@ -60,6 +111,13 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
     );
   }, [currentRules, formValues]);
 
+  // ===========================================================================
+  // handleInputChange: Gestisce l'input di ogni parametro
+  // - Converte il valore in numero
+  // - Valida contro range_min e range_max della regola
+  // - Se fuori range, aggiunge errore (mostrato inline)
+  // - Se valido, rimuove l'errore
+  // ===========================================================================
   const handleInputChange = (paramId, value, rule) => {
     const numVal = value === '' ? '' : Number(value);
     setFormValues((prev) => ({ ...prev, [paramId]: numVal }));
@@ -74,10 +132,17 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
     }
   };
 
+  // ===========================================================================
+  // handleSave: Salva la valutazione su Supabase
+  // 1. Inserisce record in 'service_inseriti' (testata con punteggio totale)
+  // 2. Inserisce N record in 'dettaglio_inserimenti' (uno per ogni parametro)
+  // Gestisce errori specifici: 23505 (duplicato), 23503 (FK non valida)
+  // ===========================================================================
   const handleSave = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
+      // 1. Inserimento testata
       const { data: header, error: hErr } = await supabase
         .from('service_inseriti')
         .insert({
@@ -89,19 +154,23 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
         .single();
 
       if (hErr) {
+        // Errore unique constraint: club + service già inserito
         if (hErr.code === '23505') {
           throw new Error('Dati già esistenti. Questo club ha già registrato questo service.');
         }
+        // Errore foreign key: club o service non esistono
         if (hErr.code === '23503') {
           throw new Error("Errore di integrità: il Club o il Service selezionato non sono validi.");
         }
         throw hErr;
       }
 
+      // 2. Inserimento dettagli (uno per ogni parametro con le sue regole)
       const details = currentRules.map((rule) => ({
-        id_service_inserito: header.id,
+        id_service_inserito: header.id, // FK al record appena creato
         id_parametro: rule.id_parametro,
         valore_dichiarato: Number(formValues[rule.id_parametro] || 0),
+        // Ricalcolo i punti per sicurezza (non fidarsi del frontend)
         punti_ottenuti:
           (Number(formValues[rule.id_parametro] || 0) / rule.range_max) * rule.punti_max,
       }));
@@ -109,8 +178,10 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
       const { error: dErr } = await supabase.from('dettaglio_inserimenti').insert(details);
       if (dErr) throw dErr;
 
+      // Successo: naviga alla pagina di conferma
       navigate('/success');
     } catch (e) {
+      // Errore: mostra toast invece di alert
       toast.error(e.message);
     } finally {
       setIsSubmitting(false);
@@ -123,6 +194,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
         resolvedTheme === 'dark' ? 'bg-[#0B132B]' : 'bg-slate-100'
       }`}
     >
+      {/* NAVBAR: back + indicatori step (3 pallini animati) */}
       <nav className="px-6 py-5 border-b border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 backdrop-blur-xl flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <button
           onClick={() => navigate('/dashboard')}
@@ -130,6 +202,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
         >
           <ChevronLeft size={24} />
         </button>
+        {/* Indicatori step: pallino largo per step attivo, stretto per gli altri */}
         <div className="flex gap-2 sm:gap-3">
           {[1, 2, 3].map((s) => (
             <div
@@ -147,6 +220,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
         <div className="w-10 sm:w-12"></div>
       </nav>
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* SIDEBAR: ProgressRing + barre progresso parametri (nascosta nello step 1) */}
         <aside
           className={`lg:w-[400px] bg-white dark:bg-black/30 border-r border-slate-200 dark:border-white/5 p-12 flex flex-col items-center justify-center transition-all duration-1000 ${
             step === 1 ? 'lg:-translate-x-full opacity-0 lg:w-0 overflow-hidden' : 'opacity-100'
@@ -159,6 +233,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
             <h4 className="text-[11px] font-black uppercase tracking-widest text-brand-red dark:text-brand-yellow text-center mb-8 bg-brand-blue/5 dark:bg-white/5 py-2 rounded-full shadow-sm">
               Analisi Parametrica
             </h4>
+            {/* Barre di progresso per ogni parametro */}
             {currentRules.map((rule) => {
               const val = formValues[rule.id_parametro] || 0;
               const perc = (val / rule.range_max) * 100;
@@ -181,8 +256,13 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
             })}
           </div>
         </aside>
+        {/* CONTENUTO PRINCIPALE: cambia in base allo step */}
         <section className="flex-1 p-6 sm:p-16 overflow-y-auto bg-white/20 dark:bg-transparent text-brand-dark dark:text-white">
           <div className="max-w-3xl mx-auto pb-32 lg:pb-0">
+            {/* =======================================================================
+                STEP 1: Selezione Club + Tipo Service
+                Le tendine leggono dai dati caricati in fetchInitialData()
+                ======================================================================= */}
             {step === 1 && (
               <div className="space-y-10 sm:space-y-12 animate-in fade-in slide-in-from-right-8 duration-500">
                 <div className="space-y-4 text-center sm:text-left">
@@ -196,6 +276,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                   </p>
                 </div>
                 <div className="space-y-8 bg-white dark:bg-white/5 p-12 rounded-[3.5rem] border border-slate-200 dark:border-white/10 shadow-2xl">
+                  {/* Tendina Club */}
                   <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-brand-blue/60 dark:text-brand-yellow ml-2">
                       Lions Club Referente
@@ -218,6 +299,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                       </div>
                     </div>
                   </div>
+                  {/* Tendina Tipo Service */}
                   <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-brand-red ml-2">
                       Categoria Progetto
@@ -250,6 +332,11 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                 </button>
               </div>
             )}
+            {/* =======================================================================
+                STEP 2: Inserimento valori per ogni parametro
+                I campi sono generati dinamicamente dalle regole_calcolo filtrate
+                Ogni campo mostra: nome parametro, limite max, input numerico, errore
+                ======================================================================= */}
             {step === 2 && (
               <div className="space-y-12 animate-in fade-in slide-in-from-right-8 duration-500">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 text-center sm:text-left">
@@ -265,6 +352,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                     {serviceTypes.find((s) => s.id === Number(selectedService))?.nome}
                   </div>
                 </div>
+                {/* Griglia dinamica di input numerici */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 px-1 text-brand-dark dark:text-white">
                   {currentRules.map((rule) => {
                     const p = parameters.find((x) => x.id === rule.id_parametro);
@@ -310,6 +398,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                     );
                   })}
                 </div>
+                {/* Pulsanti fissi in basso (fixed) */}
                 <div className="flex gap-4 fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-50">
                   <button
                     onClick={() => setStep(1)}
@@ -329,6 +418,10 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                 </div>
               </div>
             )}
+            {/* =======================================================================
+                STEP 3: Riepilogo e conferma salvataggio
+                Mostra il punteggio totale calcolato e tutti i valori inseriti
+                ======================================================================= */}
             {step === 3 && (
               <div className="space-y-12 animate-in fade-in zoom-in duration-500 text-center">
                 <div className="space-y-4">
@@ -342,6 +435,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                     Verifica i parametri acquisiti.
                   </p>
                 </div>
+                {/* Card riepilogo: nome club + punteggio + griglia valori */}
                 <div className="bg-white dark:bg-white/5 p-14 rounded-[4rem] border border-slate-200 dark:border-white/10 shadow-2xl space-y-10 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 text-brand-blue/5 dark:text-white/5 -rotate-12">
                     <Cpu size={120} />
@@ -378,6 +472,7 @@ export default function InsertWizardView({ resolvedTheme, toast }) {
                     ))}
                   </div>
                 </div>
+                {/* Pulsanti azione */}
                 <div className="flex flex-col gap-6 max-w-sm mx-auto pb-10 px-4">
                   <button
                     onClick={handleSave}

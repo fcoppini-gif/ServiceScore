@@ -1,17 +1,40 @@
+// =============================================================================
+// VIEW: LoginView - Pagina di accesso e registrazione
+// =============================================================================
+// Gestisce due modalità:
+// - 'login': email + password → autenticazione diretta
+// - 'signup': username + email + password → registrazione con conferma email
+//
+// Dopo login riuscito, App.jsx rileva il cambio sessione e reindirizza a /dashboard
+//
+// COLLEGAMENTI:
+// - Usa supabase.auth per signInWithPassword e signUp
+// - Riceve ThemeSwitcher come prop per il toggle tema
+// - I campi hanno 'required' per la validazione HTML5
+// =============================================================================
+
 import { useState } from 'react';
 import { Mail, ArrowRight, UserPlus, Activity } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandLogo from '../components/BrandLogo';
 
 export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
+  // authMode: 'login' (default) o 'signup' (cambia il form mostrato)
   const [authMode, setAuthMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // username: usato solo in registrazione, salvato come full_name in Supabase
   const [username, setUsername] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // confirmationSent: mostra la schermata "controlla la tua email"
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [error, setError] = useState('');
 
+  // ===========================================================================
+  // handleAuth: gestisce sia login che registrazione
+  // - Login: supabase.auth.signInWithPassword → errore mostra messaggio
+  // - Signup: supabase.auth.signUp → se conferma email richiesta, mostra messaggio attesa
+  // ===========================================================================
   const handleAuth = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -31,8 +54,9 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
         setError(error.message);
       } else {
         if (data?.session) {
-          // login automatico dopo registrazione
+          // Login automatico dopo registrazione (se conferma email è disabilitata)
         } else {
+          // Conferma email richiesta: mostra schermata di attesa
           setConfirmationSent(true);
         }
       }
@@ -46,9 +70,11 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
         resolvedTheme === 'dark' ? 'bg-[#0B132B]' : 'bg-slate-100'
       }`}
     >
+      {/* Toggle tema in alto */}
       <div className="mb-8 z-50">
         <ThemeSwitcher />
       </div>
+      {/* Card principale con bordo gradiente brand */}
       <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C]"></div>
         {!confirmationSent ? (
@@ -60,12 +86,14 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
             <p className="text-center text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-[0.4em] mb-10 font-bold italic">
               {authMode === 'login' ? 'Sincronizzazione Operatore' : 'Crea Profilo 01Informatica'}
             </p>
+            {/* Messaggio errore inline (sostituisce alert) */}
             {error && (
               <div className="mb-4 p-3 bg-brand-red/10 border border-brand-red/30 rounded-2xl text-brand-red text-sm font-bold text-center">
                 {error}
               </div>
             )}
             <form onSubmit={handleAuth} className="space-y-4 text-brand-dark">
+              {/* Campo Username: visibile solo in registrazione */}
               {authMode === 'signup' && (
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-500 ml-2 font-bold">
@@ -81,6 +109,7 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                   />
                 </div>
               )}
+              {/* Campo Email */}
               <div className="space-y-1 text-brand-dark">
                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-500 ml-2 font-bold">
                   Email
@@ -95,6 +124,7 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                   required
                 />
               </div>
+              {/* Campo Password */}
               <div className="space-y-1 text-brand-dark">
                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-500 ml-2 font-bold">
                   Password
@@ -109,6 +139,7 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                   required
                 />
               </div>
+              {/* Pulsante submit: cambia testo in base a login/signup, mostra spinner se submitting */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -123,6 +154,7 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                 )}
               </button>
             </form>
+            {/* Link per switchare tra login e registrazione */}
             <div className="mt-8 text-center border-t border-slate-100 dark:border-white/5 pt-6">
               <button
                 onClick={() => {
@@ -144,6 +176,9 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
             </div>
           </>
         ) : (
+          // ===========================================================================
+          // Schermata "Attesa Conferma" - mostrata dopo registrazione con email di conferma
+          // ===========================================================================
           <div className="text-center py-8 animate-in fade-in zoom-in duration-500">
             <div className="w-20 h-20 bg-brand-yellow/20 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-yellow shadow-inner">
               <Mail size={40} className="animate-bounce" />

@@ -1,3 +1,18 @@
+// =============================================================================
+// COMPONENTE: ThemeSwitcher - Toggle a 3 modalità per il tema
+// =============================================================================
+// Tre opzioni: ☀️ Chiaro | 💻 Sistema | 🌙 Scuro
+// Il tema attivo ha sfondo brand (blu in light, rosso in dark).
+//
+// PROPS:
+//   theme: valore attuale ('light' | 'system' | 'dark')
+//   onThemeChange: callback per cambiare il tema
+//
+// COLLEGAMENTI:
+// - Passato come prop a LoginView e DashboardView tramite ThemeSwitcherWrapper
+// - Lo stato del tema è gestito in App.jsx (useEffect + localStorage)
+// =============================================================================
+
 import { Sun, Moon, Laptop } from 'lucide-react';
 
 const ThemeSwitcher = ({ theme, onThemeChange }) => (
