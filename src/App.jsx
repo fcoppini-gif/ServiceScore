@@ -35,7 +35,7 @@ export default function App() {
   const [resolvedTheme, setResolvedTheme] = useState('dark');
   const [confirmationSent, setConfirmationSent] = useState(false);
 
-  // Gestione Tema
+  // Gestione Tema (Forzatura estrema per neutralizzare index.css)
   useEffect(() => {
     const root = window.document.documentElement;
     const body = window.document.body;
@@ -50,12 +50,12 @@ export default function App() {
       
       if (current === 'dark') {
         root.classList.add('dark');
-        body.style.backgroundColor = "#0B132B";
-        body.style.color = "#ffffff";
+        body.style.setProperty('background-color', '#0B132B', 'important');
+        body.style.setProperty('color', '#ffffff', 'important');
       } else {
         root.classList.remove('dark');
-        body.style.backgroundColor = "#f1f5f9";
-        body.style.color = "#0B132B";
+        body.style.setProperty('background-color', '#f1f5f9', 'important');
+        body.style.setProperty('color', '#0B132B', 'important');
       }
     };
 
@@ -150,6 +150,7 @@ export default function App() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setIsSubmitting(true);
     if (authMode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -174,26 +175,43 @@ export default function App() {
   };
 
   const handleSave = async () => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
+      // Inserimento testata
       const { data: header, error: hErr } = await supabase.from('service_inseriti').insert({
-        id_utente: session.user.id, id_club: Number(selectedClub), id_tipo_service: Number(selectedService), punteggio_totale: totalScore
+        id_utente: session.user.id, 
+        id_club: Number(selectedClub), 
+        id_tipo_service: Number(selectedService), 
+        punteggio_totale: totalScore
       }).select().single();
-      if (hErr) throw hErr;
+      
+      if (hErr) {
+        // Se l'errore è 409, il messaggio sarà più chiaro
+        throw new Error(hErr.code === '23505' ? "Dati già presenti per questo club e service!" : hErr.message);
+      }
+
+      // Inserimento dettagli
       const details = currentRules.map(rule => ({
-        id_service_inserito: header.id, id_parametro: rule.id_parametro,
+        id_service_inserito: header.id, 
+        id_parametro: rule.id_parametro,
         valore_dichiarato: Number(formValues[rule.id_parametro] || 0),
         punti_ottenuti: (Number(formValues[rule.id_parametro] || 0) / rule.range_max) * rule.punti_max
       }));
-      await supabase.from('dettaglio_inserimenti').insert(details);
+
+      const { error: dErr } = await supabase.from('dettaglio_inserimenti').insert(details);
+      if (dErr) throw dErr;
+
       setView('success');
       fetchLeaderboard();
-    } catch (e) { alert("Errore salvataggio!"); }
+    } catch (e) { 
+      alert("ERRORE CONFLITTO (409): " + e.message + "\nControlla se hai già inserito questo service o riprova tra pochi secondi."); 
+    }
     finally { setIsSubmitting(false); }
   };
 
   const ThemeSwitcher = () => (
-    <div className="flex bg-white/20 dark:bg-white/10 backdrop-blur-md p-1 rounded-2xl border border-brand-blue/10 dark:border-white/10 shadow-lg">
+    <div className="flex bg-white/30 dark:bg-white/10 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-lg">
       {[
         { id: 'light', icon: Sun },
         { id: 'system', icon: Laptop },
@@ -202,7 +220,7 @@ export default function App() {
         <button 
           key={item.id} 
           onClick={() => setTheme(item.id)} 
-          className={`p-3 rounded-xl transition-all cursor-pointer ${theme === item.id ? 'bg-brand-blue dark:bg-[#E31837] text-white shadow-md' : 'text-brand-blue/60 dark:text-slate-500 hover:text-brand-blue dark:hover:text-white'}`}
+          className={`p-3 rounded-xl transition-all cursor-pointer ${theme === item.id ? 'bg-brand-blue dark:bg-brand-red text-white shadow-md' : 'text-brand-blue dark:text-slate-500 hover:text-white dark:hover:text-white'}`}
         >
           <item.icon size={20} />
         </button>
@@ -253,14 +271,10 @@ export default function App() {
   if (view === 'login') return (
     <div className={`min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-500 relative overflow-y-auto ${resolvedTheme === 'dark' ? 'bg-[#0B132B]' : 'bg-slate-100'}`}>
       
-      {/* SELETTORE TEMA AL CENTRO SOPRA LA CARD */}
-      <div className="mb-10 z-50">
+      <div className="mb-8 z-50">
         <ThemeSwitcher />
       </div>
 
-      <div className="absolute top-[-5%] left-[-5%] w-72 h-72 bg-[#0033A0]/10 dark:bg-[#0033A0]/15 rounded-full blur-[80px] pointer-events-none"></div>
-      <div className="absolute bottom-[-5%] right-[-5%] w-72 h-72 bg-[#E31837]/10 dark:bg-[#E31837]/15 rounded-full blur-[80px] pointer-events-none"></div>
-      
       <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C]"></div>
         
@@ -270,38 +284,29 @@ export default function App() {
             <h1 className="text-2xl font-black text-brand-blue dark:text-white uppercase tracking-tighter mb-1 text-center">
                 {authMode === 'login' ? 'Area Riservata' : 'Registrazione'}
             </h1>
-            <p className="text-center text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-[0.4em] mb-8 sm:mb-10 font-bold">
-                {authMode === 'login' ? 'ServiceScore Access Control' : 'Nuovo Profilo 01Informatica'}
+            <p className="text-center text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-[0.4em] mb-8 font-bold">
+                {authMode === 'login' ? 'ServiceScore Control' : 'Nuovo Profilo 01Informatica'}
             </p>
             
-            <form onSubmit={handleAuth} className="space-y-5">
+            <form onSubmit={handleAuth} className="space-y-4">
               {authMode === 'signup' && (
-                <div className="space-y-1 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue/60 dark:text-slate-500 ml-2 font-bold">Referente / Club</label>
-                    <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input type="text" placeholder="Nome o Nome Club..." value={username} onChange={e=>setUsername(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold transition-all shadow-inner cursor-text" required />
-                    </div>
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-400 ml-2 font-bold">Referente / Club</label>
+                    <input type="text" placeholder="Nome o Nome Club..." value={username} onChange={e=>setUsername(e.target.value)}
+                        className="w-full p-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold" required />
                 </div>
               )}
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue/60 dark:text-slate-500 ml-2 font-bold">Email</label>
-                <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="email" placeholder="esempio@01info.it" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold transition-all shadow-inner cursor-text" required />
-                </div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-400 ml-2 font-bold">Email</label>
+                <input type="email" placeholder="esempio@01info.it" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email"
+                    className="w-full p-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold" required />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue/60 dark:text-slate-500 ml-2 font-bold">Password</label>
-                <div className="relative">
-                    <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)} autoComplete="current-password"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold transition-all shadow-inner cursor-text" required />
-                </div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-400 ml-2 font-bold">Password</label>
+                <input type="password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)} autoComplete="current-password"
+                    className="w-full p-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold" required />
               </div>
-              <button type="submit" disabled={isSubmitting} className="w-full cursor-pointer bg-brand-blue hover:bg-blue-800 dark:bg-gradient-to-r dark:from-[#0033A0] dark:via-[#E31837] dark:to-[#FFC72C] text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl active:scale-95 transition-all mt-4 flex justify-center items-center gap-2 border-none font-bold">
+              <button type="submit" disabled={isSubmitting} className="w-full cursor-pointer bg-brand-blue hover:bg-blue-800 dark:bg-gradient-to-r dark:from-[#0033A0] dark:via-[#E31837] dark:to-[#FFC72C] text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl active:scale-95 transition-all mt-4 flex justify-center items-center gap-2 font-bold border-none disabled:opacity-50">
                 {isSubmitting ? <Activity className="animate-spin" /> : (authMode === 'login' ? 'ACCEDI' : 'REGISTRATI')}
               </button>
             </form>
@@ -312,28 +317,27 @@ export default function App() {
                     className="group flex items-center justify-center gap-3 w-full text-[12px] font-black text-brand-blue dark:text-[#FFC72C] uppercase tracking-widest hover:scale-105 transition-all cursor-pointer p-4 rounded-2xl bg-brand-blue/5 dark:bg-white/5 border-2 border-brand-blue/20 dark:border-[#FFC72C]/20 shadow-md font-bold"
                 >
                     {authMode === 'login' ? (
-                      <><UserPlus size={16}/> Non hai un account? Registrati ora</>
+                      <><UserPlus size={16}/> Crea un nuovo account</>
                     ) : (
-                      <><ArrowRight size={16} className="rotate-180"/> Hai già un account? Torna al Login</>
+                      <><ArrowRight size={16} className="rotate-180"/> Torna al Login</>
                     )}
                 </button>
             </div>
           </>
         ) : (
           <div className="text-center py-8 animate-in fade-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-[#FFC72C]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-[#FFC72C]">
+            <div className="w-20 h-20 bg-[#FFC72C]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-blue dark:text-[#FFC72C]">
               <Mail size={40} className="animate-bounce" />
             </div>
-            <h2 className="text-2xl font-black text-brand-blue dark:text-white uppercase mb-4 tracking-tighter">Email di Verifica Inviata</h2>
+            <h2 className="text-2xl font-black text-brand-blue dark:text-white uppercase mb-4 tracking-tighter">Email Inviata</h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-8 leading-relaxed text-balance font-bold">
-              Abbiamo inviato un link di attivazione a <span className="font-bold text-brand-dark dark:text-white">{email}</span>.<br/>
-              Controlla anche la cartella Spam.
+              Controlla la tua posta elettronica (anche Spam) per attivare l'account.
             </p>
             <button 
               onClick={() => { setConfirmationSent(false); setAuthMode('login'); }}
-              className="px-8 py-4 bg-slate-200 dark:bg-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest text-brand-blue dark:text-white hover:bg-slate-300 dark:hover:bg-white/20 transition-all cursor-pointer border-none"
+              className="px-8 py-4 bg-slate-200 dark:bg-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest text-brand-blue dark:text-white hover:bg-slate-300 dark:hover:bg-white/20 transition-all cursor-pointer border-none font-bold"
             >
-              Torna alla schermata Login
+              Torna al Login
             </button>
           </div>
         )}
@@ -357,9 +361,9 @@ export default function App() {
       <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-12 space-y-8 sm:y-10 pb-24">
         <div className="p-8 sm:p-12 rounded-[2.5rem] sm:rounded-[3.5rem] bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 relative overflow-hidden shadow-xl group transition-all duration-500">
            <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-blue/5 dark:bg-brand-blue/10 rounded-full blur-3xl group-hover:bg-brand-blue/20 transition-all duration-700"></div>
-           <div className="relative z-10 text-center sm:text-left">
+           <div className="relative z-10 text-center sm:text-left text-brand-dark dark:text-white">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red dark:text-brand-yellow mb-3 font-bold">01Informatica Intelligence</h2>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter mb-8 sm:mb-10 uppercase text-brand-blue dark:text-white">Classifica Club</h1>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter mb-8 sm:mb-10 uppercase">Classifica Club</h1>
               <button onClick={() => {setView('insert'); setStep(1); setFormValues({}); setSelectedService('');}} 
                 className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-8 sm:px-10 py-4 sm:py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover:scale-105 transition-all active:scale-95 text-lg border-none font-bold">
                 <Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1"/> NUOVA ANALISI
@@ -371,20 +375,20 @@ export default function App() {
           <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 ml-4 text-brand-blue dark:text-white">
              <Trophy className="text-brand-yellow drop-shadow-sm" /> Ranking Distrettuale
           </h3>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-4 text-brand-dark dark:text-white">
             {leaderboard.length === 0 ? (
-                <div className="text-center p-12 sm:p-16 bg-white dark:bg-white/5 rounded-[2.5rem] sm:rounded-[3rem] border border-dashed border-slate-300 dark:border-white/10 text-slate-400 font-bold uppercase tracking-widest text-xs sm:text-sm italic">In attesa di dati ufficiali...</div>
+                <div className="text-center p-12 sm:p-16 bg-white dark:bg-white/5 rounded-[2.5rem] sm:rounded-[3rem] border border-dashed border-slate-300 dark:border-white/10 text-slate-400 font-bold uppercase tracking-widest text-xs sm:text-sm">In attesa di dati ufficiali...</div>
             ) : leaderboard.map((item, i) => (
               <div key={i} className="flex items-center justify-between p-5 sm:p-6 bg-white dark:bg-white/5 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-white/10 hover:border-brand-blue/40 transition-all shadow-sm group">
                 <div className="flex items-center gap-4 sm:gap-6">
                   <div className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-[1rem] sm:rounded-[1.25rem] font-black text-xl shadow-inner transition-transform group-hover:scale-110 ${
                     i === 0 ? 'bg-gradient-to-br from-brand-yellow to-amber-500 text-brand-dark' : 
                     i === 1 ? 'bg-slate-300 text-slate-700' : 
-                    'bg-slate-100 dark:bg-white/5 text-brand-blue/60 dark:text-white border dark:border-white/10 font-bold'
+                    'bg-slate-100 dark:bg-white/5 text-brand-blue dark:text-white border dark:border-white/10 font-bold'
                   }`}>
                     #{i + 1}
                   </div>
-                  <span className="text-sm sm:text-lg font-black uppercase tracking-tight truncate max-w-[150px] sm:max-w-none text-brand-blue dark:text-white">{item.nome}</span>
+                  <span className="text-sm sm:text-lg font-black uppercase tracking-tight truncate max-w-[150px] sm:max-w-none">{item.nome}</span>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl sm:text-3xl font-black text-brand-blue dark:text-white leading-none">{item.score.toFixed(1)}</div>
@@ -427,8 +431,8 @@ export default function App() {
                 return (
                   <div key={rule.id} className="space-y-2">
                      <div className="flex justify-between text-[9px] font-black uppercase opacity-60 px-1 text-brand-blue dark:text-slate-400 font-bold">
-                        <span className="truncate max-w-[150px]">{parameters.find(p=>p.id===rule.id_parametro)?.nome}</span>
-                        <span>{Math.round(perc)}%</span>
+                        <span className="truncate max-w-[150px] font-bold">{parameters.find(p=>p.id===rule.id_parametro)?.nome}</span>
+                        <span className="font-bold">{Math.round(perc)}%</span>
                      </div>
                      <div className="h-1.5 bg-slate-300 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
                         <div className="h-full bg-gradient-to-r from-brand-blue to-brand-red transition-all duration-700" style={{ width: `${perc}%` }}></div>
@@ -439,18 +443,18 @@ export default function App() {
            </div>
         </aside>
 
-        <section className="flex-1 p-4 sm:p-10 lg:p-16 overflow-y-auto bg-white/20 dark:bg-transparent">
+        <section className="flex-1 p-4 sm:p-10 lg:p-16 overflow-y-auto bg-white/20 dark:bg-transparent text-brand-dark dark:text-white">
           <div className="max-w-3xl mx-auto pb-32 lg:pb-0">
             {step === 1 && (
               <div className="space-y-10 sm:y-12 animate-in fade-in slide-in-from-right-8 duration-500">
                 <div className="space-y-4 text-center sm:text-left">
-                   <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter text-brand-blue dark:text-white leading-tight">Configura<br/><span className="text-brand-red dark:text-brand-yellow font-black">Analisi</span></h2>
+                   <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-tight">Configura<br/><span className="text-brand-red dark:text-brand-yellow font-black">Analisi</span></h2>
                    <p className="text-slate-600 dark:text-slate-400 font-medium text-base sm:text-lg font-bold italic">Inizializza i dati per procedere.</p>
                 </div>
 
                 <div className="space-y-6 sm:space-y-8 bg-white dark:bg-white/5 p-8 sm:p-12 rounded-[2.5rem] sm:rounded-[3.5rem] border border-slate-200 dark:border-white/10 shadow-2xl">
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase tracking-widest text-brand-blue/60 dark:text-brand-yellow ml-2 font-bold">Lions Club Referente</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow ml-2 font-bold">Lions Club Referente</label>
                     <div className="relative">
                         <select value={selectedClub} onChange={e=>setSelectedClub(e.target.value)} className="w-full cursor-pointer p-5 sm:p-6 bg-slate-100 dark:bg-brand-dark border border-slate-200 dark:border-white/10 rounded-[2rem] sm:rounded-[2.5rem] text-base sm:text-lg font-bold outline-none focus:ring-4 focus:ring-brand-yellow/20 appearance-none shadow-inner dark:text-white">
                         <option value="">Seleziona Club...</option>
@@ -471,7 +475,7 @@ export default function App() {
                   </div>
                 </div>
                 
-                <button onClick={() => setStep(2)} disabled={!selectedClub || !selectedService} className="w-full cursor-pointer py-6 sm:py-7 bg-brand-blue text-white font-black rounded-[2rem] sm:rounded-[2.5rem] uppercase tracking-[0.2em] text-lg sm:text-xl hover:shadow-2xl hover:scale-[1.02] disabled:opacity-20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none font-bold">
+                <button onClick={() => setStep(2)} disabled={!selectedClub || !selectedService || isSubmitting} className="w-full cursor-pointer py-6 sm:py-7 bg-brand-blue text-white font-black rounded-[2rem] sm:rounded-[2.5rem] uppercase tracking-widest text-lg sm:text-xl hover:shadow-2xl hover:scale-[1.02] disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-3 border-none font-bold">
                   CONTINUA <ArrowRight size={24}/>
                 </button>
               </div>
@@ -489,7 +493,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-1 text-brand-dark dark:text-white">
                   {currentRules.map(rule => {
                     const p = parameters.find(x => x.id === rule.id_parametro);
                     const err = formErrors[rule.id_parametro];
@@ -503,7 +507,7 @@ export default function App() {
                            <Activity size={18} className="text-brand-blue/20 dark:text-white/10 group-hover:text-brand-yellow transition-colors" />
                         </div>
                         <input type="number" placeholder="0" value={formValues[rule.id_parametro] || ''} onChange={e=>handleInputChange(rule.id_parametro, e.target.value, rule)}
-                          className={`w-full bg-transparent text-4xl sm:text-5xl font-black outline-none border-b-4 transition-all pb-2 cursor-text text-brand-blue dark:text-white font-bold ${err ? 'border-brand-red text-brand-red' : 'border-slate-100 dark:border-white/10 focus:border-brand-blue'}`} />
+                          className={`w-full bg-transparent text-4xl sm:text-5xl font-black outline-none border-b-4 transition-all pb-2 cursor-text font-bold ${err ? 'border-brand-red text-brand-red' : 'border-slate-100 dark:border-white/10 focus:border-brand-blue dark:text-white'}`} />
                         {err && <div className="text-[9px] font-black text-brand-red uppercase mt-3 flex items-center gap-1 font-bold"><AlertCircle size={12}/> {err}</div>}
                       </div>
                     );
@@ -511,8 +515,8 @@ export default function App() {
                 </div>
 
                 <div className="flex gap-4 fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl px-4 sm:px-6 z-50 font-bold">
-                  <button onClick={() => setStep(1)} className="flex-1 cursor-pointer py-4 sm:py-5 bg-white dark:bg-brand-dark border border-slate-300 dark:border-white/20 rounded-2xl font-black uppercase tracking-widest text-xs sm:text-sm shadow-xl active:scale-90 transition-transform text-brand-blue dark:text-white border-none">INDIETRO</button>
-                  <button onClick={() => setStep(3)} disabled={Object.keys(formErrors).length > 0} className="flex-[2] cursor-pointer bg-brand-blue text-white py-4 sm:py-5 rounded-2xl font-black uppercase tracking-widest text-xs sm:text-sm shadow-xl hover:scale-105 active:scale-95 transition-all font-bold border-none">CONFERMA</button>
+                  <button onClick={() => setStep(1)} className="flex-1 cursor-pointer py-4 sm:py-5 bg-white dark:bg-brand-dark border border-slate-300 dark:border-white/20 rounded-2xl font-black uppercase tracking-widest text-xs sm:text-sm shadow-xl active:scale-90 transition-transform text-brand-blue dark:text-white border-none font-bold">INDIETRO</button>
+                  <button onClick={() => setStep(3)} disabled={Object.keys(formErrors).length > 0 || isSubmitting} className="flex-[2] cursor-pointer bg-brand-blue text-white py-4 sm:py-5 rounded-2xl font-black uppercase tracking-widest text-xs sm:text-sm shadow-xl hover:scale-105 active:scale-95 transition-all font-bold border-none disabled:opacity-50">CONFERMA</button>
                 </div>
               </div>
             )}
@@ -523,8 +527,8 @@ export default function App() {
                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-brand-yellow/10 rounded-[2rem] flex items-center justify-center mx-auto text-brand-blue dark:text-brand-yellow shadow-inner">
                       <ShieldCheck size={52} className="animate-pulse" />
                    </div>
-                   <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter text-brand-blue dark:text-white leading-none">Riepilogo<br/><span className="text-brand-red dark:text-brand-yellow font-black">Analisi</span></h2>
-                   <p className="text-slate-600 dark:text-slate-400 max-w-xs sm:max-w-sm mx-auto font-medium text-sm sm:text-base font-bold italic">Verifica finale database.</p>
+                   <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none">Riepilogo<br/><span className="text-brand-red dark:text-brand-yellow font-black">Analisi</span></h2>
+                   <p className="text-slate-500 dark:text-slate-400 max-w-xs sm:max-w-sm mx-auto font-medium text-sm sm:text-base font-bold italic">Verifica finale database.</p>
                 </div>
 
                 <div className="bg-white dark:bg-white/5 p-8 sm:p-14 rounded-[3rem] sm:rounded-[4rem] border border-slate-200 dark:border-white/10 shadow-2xl space-y-8 sm:space-y-10 relative overflow-hidden group">
@@ -532,26 +536,26 @@ export default function App() {
                    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pb-8 border-b border-slate-100 dark:border-white/5 relative z-10 text-balance font-bold">
                       <div className="text-center sm:text-left">
                          <div className="text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-widest mb-2 font-bold">Club</div>
-                         <div className="text-xl sm:text-2xl font-black uppercase tracking-tight leading-none text-brand-blue dark:text-white font-bold">{clubs.find(c=>c.id===Number(selectedClub))?.nome}</div>
+                         <div className="text-xl sm:text-2xl font-black uppercase tracking-tight leading-none font-bold">{clubs.find(c=>c.id===Number(selectedClub))?.nome}</div>
                       </div>
                       <div className="text-center sm:text-right">
-                         <div className="text-[10px] font-black text-brand-red dark:text-brand-yellow uppercase tracking-widest mb-2 font-bold">Punteggio Stimato</div>
+                         <div className="text-[10px] font-black text-brand-red dark:text-brand-yellow uppercase tracking-widest mb-2 font-bold">Output</div>
                          <div className="text-5xl sm:text-6xl font-black text-brand-blue dark:text-white tracking-tighter leading-none font-bold">{totalScore.toFixed(2)}</div>
                       </div>
                    </div>
                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 relative z-10 px-2 font-bold">
                       {currentRules.map(rule => (
-                        <div key={rule.id} className="text-center p-3 sm:p-4 bg-slate-50 dark:bg-black/30 rounded-2xl border border-slate-200 dark:border-white/5 shadow-inner transition-colors group-hover:border-brand-blue/30">
+                        <div key={rule.id} className="text-center p-3 sm:p-4 bg-slate-50 dark:bg-black/30 rounded-2xl border border-slate-200 dark:border-white/5 shadow-inner transition-colors group-hover:border-brand-blue/30 font-bold">
                            <div className="text-[8px] font-black text-slate-500 dark:text-slate-500 uppercase mb-2 truncate px-1 font-bold">{parameters.find(p=>p.id===rule.id_parametro)?.nome}</div>
-                           <div className="text-lg sm:text-xl font-black text-brand-blue dark:text-white font-bold">{formValues[rule.id_parametro] || 0}</div>
+                           <div className="text-lg sm:text-xl font-black font-bold">{formValues[rule.id_parametro] || 0}</div>
                         </div>
                       ))}
                    </div>
                 </div>
 
                 <div className="flex flex-col gap-6 max-w-sm mx-auto pb-10 px-4 font-bold">
-                  <button onClick={handleSave} disabled={isSubmitting} className="w-full cursor-pointer py-6 sm:py-8 bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow text-white font-black rounded-[2rem] sm:rounded-[2.5rem] uppercase tracking-[0.2em] text-xl sm:text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all font-bold border-none">
-                    {isSubmitting ? <Activity className="animate-spin mx-auto" /> : "REGISTRA"}
+                  <button onClick={handleSave} disabled={isSubmitting} className="w-full cursor-pointer py-6 sm:py-8 bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow text-white font-black rounded-[2rem] sm:rounded-[2.5rem] uppercase tracking-[0.2em] text-xl sm:text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all font-bold border-none disabled:opacity-50">
+                    {isSubmitting ? <Activity className="animate-spin mx-auto" /> : "REGISTRA ORA"}
                   </button>
                   <button onClick={() => setStep(2)} className="text-slate-500 dark:text-slate-400 font-black uppercase text-[10px] sm:text-xs hover:text-brand-blue dark:hover:text-brand-yellow transition-colors cursor-pointer active:scale-90 p-2 font-bold underline decoration-2 underline-offset-4 decoration-brand-yellow/30">Modifica Dati</button>
                 </div>
@@ -570,9 +574,9 @@ export default function App() {
       <div className="bg-gradient-to-br from-[#0033A0] via-[#E31837] to-[#FFC72C] p-12 sm:p-16 rounded-[4rem] sm:rounded-[5rem] animate-bounce shadow-2xl mb-12 relative z-10 border-4 border-white/20">
         <CheckCircle2 size={120} className="text-white drop-shadow-2xl" />
       </div>
-      <h1 className="text-6xl sm:text-7xl font-black text-brand-blue dark:text-white tracking-tighter mb-6 uppercase leading-none relative z-10 italic">MISSION<br/><span className="text-brand-yellow">COMPLETED</span></h1>
-      <p className="text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.5em] mb-12 sm:mb-16 relative z-10 text-xs sm:text-sm font-bold italic">DATABASE SYNCHRONIZED</p>
-      <button onClick={() => setView('dashboard')} className="px-20 sm:px-24 py-6 sm:py-8 bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black rounded-[2.5rem] sm:rounded-[3rem] uppercase tracking-widest text-lg sm:text-xl hover:shadow-2xl active:scale-95 transition-all cursor-pointer relative z-10 font-bold border-none">
+      <h1 className="text-6xl sm:text-7xl font-black text-brand-blue dark:text-white tracking-tighter mb-6 uppercase leading-none relative z-10 italic font-black">MISSION<br/><span className="text-brand-yellow">COMPLETED</span></h1>
+      <p className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.5em] mb-12 sm:mb-16 relative z-10 text-xs sm:text-sm font-bold italic">DATABASE SYNCHRONIZED</p>
+      <button onClick={() => setView('dashboard')} className="px-20 sm:px-24 py-6 sm:py-8 bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black rounded-[2.5rem] sm:rounded-[3rem] uppercase tracking-widest text-lg sm:text-xl hover:shadow-2xl active:scale-95 transition-all cursor-pointer relative z-10 font-bold border-none font-bold">
         DASHBOARD
       </button>
     </div>
