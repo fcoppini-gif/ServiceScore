@@ -17,17 +17,21 @@ function AppContent() {
   const { user, userProfile, isAdmin, userClubs, loading, refresh } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system');
   const [resolvedTheme, setResolvedTheme] = useState('dark');
-  const [isFirstVisit, setIsFirstVisit] = useState(false);
   const { toast, ToastContainer } = useToast();
 
-  // Redirect new visitors to installazione.html
+  // Redirect new visitors to installazione.html ONLY if not logged in and app is fully loaded
   useEffect(() => {
+    if (loading) return;
     const hasVisited = localStorage.getItem('hasVisited');
-    if (!hasVisited) {
-      setIsFirstVisit(true);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    if (!hasVisited && !user && !isStandalone) {
       window.location.href = '/installazione.html';
+    } else if (hasVisited === 'true') {
+      return;
+    } else if (user) {
+      localStorage.setItem('hasVisited', 'true');
     }
-  }, []);
+  }, [loading, user]);
 
   // Gestione tema
   useEffect(() => {
