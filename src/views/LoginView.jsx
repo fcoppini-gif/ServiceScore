@@ -174,6 +174,18 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                 )}
               </button>
             </div>
+
+            {/* Link al sito */}
+            <div className="mt-6 text-center">
+              <a 
+                href="https://www.info01.it/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
+              >
+                Powered by 01Informatica
+              </a>
+            </div>
           </>
         ) : (
           // ===========================================================================
