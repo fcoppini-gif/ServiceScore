@@ -19,15 +19,19 @@ function AppContent() {
   const [resolvedTheme, setResolvedTheme] = useState('dark');
   const { toast, ToastContainer } = useToast();
 
-  // Redirect new visitors to installazione.html ONLY if not logged in and app is fully loaded
+  // Redirect new visitors to installazione.html ONLY on first visit AND only from browser (not installed app)
   useEffect(() => {
     if (loading) return;
     const hasVisited = localStorage.getItem('hasVisited');
+    // Check if app is installed (standalone mode)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    if (!hasVisited && !user && !isStandalone) {
+    // Only redirect if: never visited AND not logged in AND not installed
+    if (!hasVisited && !user && isStandalone) {
+      // App installed but first visit - just mark as visited, don't redirect
+      localStorage.setItem('hasVisited', 'true');
+    } else if (!hasVisited && !user && !isStandalone) {
+      // Not installed and not logged in - redirect to installazione
       window.location.href = '/installazione.html';
-    } else if (hasVisited === 'true') {
-      return;
     } else if (user) {
       localStorage.setItem('hasVisited', 'true');
     }
