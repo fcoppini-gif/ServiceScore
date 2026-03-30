@@ -11,6 +11,25 @@
   --color-brand-dark: #0B132B;
   
   --radius-4xl: 2rem;
+  
+  --animate-gradient: gradient 2s linear infinite;
+  --animate-slide-up: slide-up 0.3s ease-out;
+  
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 :root {
@@ -85,4 +104,102 @@ input::-webkit-inner-spin-button {
 /* Navbar dark */
 .dark nav {
   border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* =============================================================================
+   SELECT STYLING - BELLO E MOBILE-OPTIMIZED
+   ============================================================================= */
+
+/* Nasconde select nativa e permette styling custom */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230033A0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.25rem center;
+  background-size: 1.25rem;
+  padding-right: 3.5rem !important;
+}
+
+/* Light mode select */
+select {
+  background-color: #F1F5F9 !important;
+  border: 2px solid #E2E8F0 !important;
+  color: #0B132B !important;
+  font-weight: 700 !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.2s ease !important;
+}
+
+select:hover {
+  border-color: #0033A0 !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 51, 160, 0.15) !important;
+}
+
+select:focus {
+  border-color: #0033A0 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Dark mode select */
+.dark select {
+  background-color: #1E293B !important;
+  border: 2px solid #334155 !important;
+  color: #F8FAFC !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFC72C' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark select:hover {
+  border-color: #FFC72C !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(255, 199, 44, 0.2) !important;
+}
+
+.dark select:focus {
+  border-color: #FFC72C !important;
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(255, 199, 44, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* =============================================================================
+   SELECT OPTIONS - LIGHT MODE (default)
+   ============================================================================= */
+:root select option,
+select option {
+  background-color: #FFFFFF !important;
+  color: #0B132B !important;
+  padding: 0.875rem 1rem !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+}
+
+:root select option:hover,
+:root select option:focus,
+:root select option:checked,
+select option:hover,
+select option:focus,
+select option:checked {
+  background: linear-gradient(135deg, #0033A0 0%, #0044B8 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* =============================================================================
+   SELECT OPTIONS - DARK MODE
+   ============================================================================= */
+.dark select option {
+  background-color: #1E293B !important;
+  color: #E2E8F0 !important;
+  padding: 0.875rem 1rem !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+}
+
+.dark select option:hover,
+.dark select option:focus,
+.dark select option:checked {
+  background: linear-gradient(135deg, #FFC72C 0%, #FFB700 100%) !important;
+  color: #0B132B !important;
+  font-weight: 700 !important;
 }

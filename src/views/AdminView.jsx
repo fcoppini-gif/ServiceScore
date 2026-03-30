@@ -389,7 +389,7 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
               <div className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow">Seleziona Club</div>
               <div className="flex gap-3">
                 <select value={selectedServiceClub} onChange={(e) => { setSelectedServiceClub(e.target.value); fetchClubServices(e.target.value); }}
-                  className="flex-1 px-5 py-4 bg-slate-100 dark:bg-black/50 rounded-2xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                  className="flex-1 py-3 px-5 rounded-xl text-sm font-bold cursor-pointer">
                   <option value="">Seleziona un club...</option>
                   {clubs.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
                 </select>
@@ -474,12 +474,12 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
               <div className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow">Nuova Regola</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <select value={newRule.id_tipo_service} onChange={(e) => setNewRule({ ...newRule, id_tipo_service: e.target.value })}
-                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                  className="px-4 py-3 rounded-xl text-sm font-bold cursor-pointer">
                   <option value="">Service...</option>
                   {serviceTypes.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
                 </select>
                 <select value={newRule.id_parametro} onChange={(e) => setNewRule({ ...newRule, id_parametro: e.target.value })}
-                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                  className="px-4 py-3 rounded-xl text-sm font-bold cursor-pointer">
                   <option value="">Parametro...</option>
                   {allParams.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
@@ -541,7 +541,7 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
                 <input type="text" placeholder="Username" value={newUsername} onChange={(e) => setNewUsername(e.target.value)}
                   className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none text-brand-dark dark:text-white border border-slate-200 dark:border-white/20" />
                 <select value={newRuolo} onChange={(e) => setNewRuolo(e.target.value)}
-                  className="px-4 py-3 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                  className="px-4 py-3 rounded-xl text-sm font-bold cursor-pointer">
                   <option value="referente">Referente</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -589,7 +589,7 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{u.id}</div>
                   </div>
                   <select value={u.ruolo || 'referente'} onChange={(e) => changeUserRole(u.id, e.target.value)}
-                    className="px-4 py-2 bg-slate-100 dark:bg-black/50 rounded-xl text-sm font-bold outline-none cursor-pointer text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                    className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer">
                     <option value="admin">Admin</option>
                     <option value="referente">Referente</option>
                   </select>

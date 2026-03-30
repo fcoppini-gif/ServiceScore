@@ -136,14 +136,14 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row">
         {/* Sidebar ProgressRing */}
-        <aside className={`lg:w-[400px] bg-white dark:bg-black/40 border-r border-slate-200 dark:border-white/10 p-12 flex flex-col items-center justify-center transition-all duration-1000 ${step === 1 ? 'lg:-translate-x-full opacity-0 lg:w-0 overflow-hidden' : 'opacity-100'}`}>
-          <div className="bg-slate-50 dark:bg-white/[0.08] p-6 rounded-[3rem] shadow-xl border border-slate-200 dark:border-white/15">
+        <aside className={`lg:w-[400px] bg-white dark:bg-black/40 border-r border-slate-200 dark:border-white/10 p-6 lg:p-12 flex flex-col items-center justify-center transition-all duration-500 ${step === 1 ? 'hidden lg:flex lg:-translate-x-full lg:opacity-0 lg:w-0' : 'opacity-100'}`}>
+          <div className="bg-slate-50 dark:bg-white/[0.08] p-4 lg:p-6 rounded-[2rem] lg:rounded-[3rem] shadow-xl border border-slate-200 dark:border-white/15">
             <ProgressRing score={totalScore} max={maxPossibleScore} />
           </div>
-          <div className="mt-12 w-full space-y-6 max-w-sm px-4">
-            <h4 className="text-[11px] font-black uppercase tracking-widest text-brand-red dark:text-brand-yellow text-center mb-8 bg-brand-blue/5 dark:bg-white/10 py-2 rounded-full shadow-sm">
+          <div className="mt-6 lg:mt-12 w-full space-y-4 lg:space-y-6 max-w-sm px-4">
+            <h4 className="text-[11px] font-black uppercase tracking-widest text-brand-red dark:text-brand-yellow text-center mb-4 lg:mb-8 bg-brand-blue/5 dark:bg-white/10 py-2 rounded-full shadow-sm">
               Analisi Parametrica
             </h4>
             {currentRules.map((rule) => {
@@ -165,8 +165,8 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
         </aside>
 
         {/* Contenuto */}
-        <section className="flex-1 p-4 sm:p-8 sm:pt-6 overflow-y-auto bg-white/20 dark:bg-transparent text-brand-dark dark:text-white">
-          <div className="max-w-3xl mx-auto pb-32 lg:pb-0">
+        <section className={`flex-1 p-4 sm:p-6 lg:p-12 overflow-y-auto bg-white/20 dark:bg-transparent text-brand-dark dark:text-white ${step === 1 ? 'lg:flex lg:justify-center' : ''}`}>
+          <div className="max-w-3xl mx-auto pb-24 lg:pb-0">
             {/* STEP 1 */}
             {step === 1 && (
               <div className="space-y-8 sm:space-y-10 animate-in fade-in slide-in-from-right-8 duration-500">
@@ -183,30 +183,20 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
                   {/* Club */}
                   <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-brand-blue/60 dark:text-brand-yellow ml-2">Lions Club</label>
-                    <div className="relative text-brand-dark dark:text-white">
-                      <select value={selectedClub} onChange={(e) => setSelectedClub(e.target.value)}
-                        className="w-full cursor-pointer p-6 bg-slate-100 dark:bg-black/50 border border-slate-200 dark:border-white/20 rounded-[2.5rem] text-lg outline-none focus:ring-4 focus:ring-brand-yellow/20 appearance-none shadow-inner">
-                        <option value="">Seleziona Club...</option>
-                        {clubs.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-                      </select>
-                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 dark:text-white">
-                        <ArrowRight size={20} className="rotate-90" />
-                      </div>
-                    </div>
+                    <select value={selectedClub} onChange={(e) => setSelectedClub(e.target.value)}
+                      className="w-full cursor-pointer py-5 px-6 rounded-[2rem] text-base sm:text-lg font-bold">
+                      <option value="">Seleziona Club...</option>
+                      {clubs.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                    </select>
                   </div>
                   {/* Service */}
                   <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-brand-red ml-2">Categoria Progetto</label>
-                    <div className="relative text-brand-dark dark:text-white">
-                      <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}
-                        className="w-full cursor-pointer p-6 bg-slate-100 dark:bg-black/50 border border-slate-200 dark:border-white/20 rounded-[2.5rem] text-lg outline-none focus:ring-4 focus:ring-brand-red/20 appearance-none shadow-inner">
-                        <option value="">Seleziona Service...</option>
-                        {serviceTypes.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
-                      </select>
-                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 dark:text-white">
-                        <ArrowRight size={20} className="rotate-90" />
-                      </div>
-                    </div>
+                    <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}
+                      className="w-full cursor-pointer py-5 px-6 rounded-[2rem] text-base sm:text-lg font-bold">
+                      <option value="">Seleziona Service...</option>
+                      {serviceTypes.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                    </select>
                   </div>
                 </div>
                 <button onClick={() => setStep(2)} disabled={!selectedClub || !selectedService || isSubmitting}

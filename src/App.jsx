@@ -17,7 +17,17 @@ function AppContent() {
   const { user, userProfile, isAdmin, userClubs, loading, refresh } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system');
   const [resolvedTheme, setResolvedTheme] = useState('dark');
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
   const { toast, ToastContainer } = useToast();
+
+  // Redirect new visitors to installazione.html
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('hasVisited');
+    if (!hasVisited) {
+      setIsFirstVisit(true);
+      window.location.href = '/installazione.html';
+    }
+  }, []);
 
   // Gestione tema
   useEffect(() => {
@@ -46,6 +56,13 @@ function AppContent() {
     mediaQuery.addEventListener('change', listener);
     return () => mediaQuery.removeEventListener('change', listener);
   }, [theme]);
+
+  // Mark user as visited after first interaction
+  useEffect(() => {
+    if (user && !localStorage.getItem('hasVisited')) {
+      localStorage.setItem('hasVisited', 'true');
+    }
+  }, [user]);
 
   // Memoizzo il ThemeSwitcherWrapper per evitare re-mount
   const ThemeSwitcherWrapper = useMemo(

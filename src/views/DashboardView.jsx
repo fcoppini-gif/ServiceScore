@@ -95,24 +95,69 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
                 {isAdmin ? 'Nessun dato presente.' : 'Nessun dato per i tuoi club.'}
               </div>
             ) : (
-              leaderboard.map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-6 bg-white dark:bg-white/[0.08] rounded-[2.5rem] border border-slate-200 dark:border-white/20 hover:border-brand-blue/40 transition-all shadow-sm group">
-                  <div className="flex items-center gap-6">
-                    <div className={`w-14 h-14 flex items-center justify-center rounded-[1.25rem] font-black text-xl shadow-inner transition-transform group-hover:scale-110 ${
-                      i === 0 ? 'bg-gradient-to-br from-brand-yellow to-amber-500 text-brand-dark'
-                      : i === 1 ? 'bg-slate-300 text-slate-700'
-                      : 'bg-slate-50 dark:bg-white/10 text-brand-blue dark:text-white border dark:border-white/20'
-                    }`}>
-                      #{i + 1}
+              leaderboard.map((item, i) => {
+                const maxScore = leaderboard[0]?.score || 1;
+                const progress = (item.score / maxScore) * 100;
+                return (
+                  <div 
+                    key={i} 
+                    className={`relative overflow-hidden p-6 rounded-[2.5rem] border transition-all shadow-sm group animate-slide-up ${
+                      i === 0 
+                        ? 'bg-gradient-to-r from-brand-yellow/20 to-transparent dark:from-brand-yellow/10 border-brand-yellow/50 shadow-[0_0_30px_rgba(255,199,44,0.3)]' 
+                        : 'bg-white dark:bg-white/[0.08] border-slate-200 dark:border-white/20 hover:border-brand-blue/40'
+                    }`}
+                    style={{ animationDelay: `${i * 80}ms` }}
+                  >
+                    {/* Progress bar background */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-200 dark:bg-white/10">
+                      <div 
+                        className={`h-full transition-all duration-1000 ${i === 0 ? 'bg-brand-yellow' : 'bg-brand-blue'}`}
+                        style={{ width: `${progress}%` }}
+                      />
                     </div>
-                    <span className="text-lg font-black uppercase tracking-tight truncate max-w-[200px] sm:max-w-none">{item.nome}</span>
+
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="flex items-center gap-4 sm:gap-6">
+                        {/* Position badge with icons */}
+                        <div className={`relative w-14 h-14 flex items-center justify-center rounded-[1.25rem] font-black text-xl shadow-inner transition-transform group-hover:scale-110 ${
+                          i === 0 
+                            ? 'bg-gradient-to-br from-brand-yellow to-amber-500 text-brand-dark' 
+                            : i === 1 
+                            ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-slate-700'
+                            : 'bg-slate-50 dark:bg-white/10 text-brand-blue dark:text-white border dark:border-white/20'
+                        }`}>
+                          {i === 0 && (
+                            <span className="absolute -top-2 -right-2 text-lg">👑</span>
+                          )}
+                          {i === 1 && (
+                            <span className="absolute -top-2 -right-2 text-lg">🥈</span>
+                          )}
+                          {i === 2 && (
+                            <span className="absolute -top-2 -right-2 text-lg">🥉</span>
+                          )}
+                          {i > 2 && `#${i + 1}`}
+                        </div>
+                        
+                        <span className="text-lg font-black uppercase tracking-tight truncate max-w-[150px] sm:max-w-none">
+                          {item.nome}
+                        </span>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className={`text-3xl font-black leading-none ${i === 0 ? 'text-brand-yellow drop-shadow-md' : 'text-brand-blue dark:text-white'}`}>
+                          {item.score.toFixed(1)}
+                        </div>
+                        <div className="text-[9px] font-black uppercase text-brand-red dark:text-brand-yellow tracking-widest mt-1">Punti Totali</div>
+                      </div>
+                    </div>
+
+                    {/* Progress percentage shown on hover */}
+                    <div className="absolute bottom-2 right-4 text-[8px] font-bold opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">
+                      {progress.toFixed(0)}%
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-black text-brand-blue dark:text-white leading-none">{item.score.toFixed(1)}</div>
-                    <div className="text-[9px] font-black uppercase text-brand-red dark:text-brand-yellow tracking-widest mt-1">Punti Totali</div>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
