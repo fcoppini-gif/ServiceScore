@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Definizione del tema personalizzato 01Informatica per Tailwind v4 */
 @theme {
   --color-brand-blue: #0033A0;
