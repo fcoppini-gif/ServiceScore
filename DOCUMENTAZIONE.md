@@ -201,7 +201,73 @@ VITE_APP_URL=https://servicescore.vercel.app
 
 ---
 
-## 9. Strumenti Extra
+## 9. Row Level Security (RLS Policies)
+
+Le RLS policies su Supabase controllano chi può leggere e scrivere i dati. L'app usa la chiave anon, quindi le policies devono permettere le operazioni necessarie.
+
+### Query SQL per configurare le policies
+
+```sql
+-- Abilita RLS su tutte le tabelle
+ALTER TABLE utenti ENABLE ROW LEVEL SECURITY;
+ALTER TABLE club ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tipi_service ENABLE ROW LEVEL SECURITY;
+ALTER TABLE parametri ENABLE ROW LEVEL SECURITY;
+ALTER TABLE regole_calcolo ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_inseriti ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dettaglio_inserimenti ENABLE ROW LEVEL SECURITY;
+ALTER TABLE utenti_club ENABLE ROW LEVEL SECURITY;
+
+-- Policy completa (SELECT + INSERT + UPDATE + DELETE) per ogni tabella
+CREATE POLICY "Accesso utenti" ON utenti FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Accesso club" ON club FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Accesso tipi_service" ON tipi_service FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Accesso parametri" ON parametri FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Accesso regole_calcolo" ON regole_calcolo FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Accesso service_inseriti" ON service_inseriti FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Accesso dettaglio_inserimenti" ON dettaglio_inserimenti FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Accesso utenti_club" ON utenti_club FOR ALL USING (true) WITH CHECK (true);
+
+-- Storage: policies per il bucket avatars
+CREATE POLICY "Upload avatars" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars');
+CREATE POLICY "Lettura avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Aggiorna avatars" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars');
+```
+
+### Trigger: collegamento auth.users → utenti
+
+```sql
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.utenti SET id = NEW.id
+  WHERE username = COALESCE(NEW.raw_user_meta_data->>'full_name', 'nuovo_utente')
+    AND id::text NOT SIMILAR TO '[0-9a-f]{8}-[0-9a-f]{4}%';
+  IF NOT FOUND THEN
+    INSERT INTO public.utenti (id, username, password_hash, ruolo)
+    VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', 'nuovo_utente'), 'managed_by_supabase_auth', 'referente')
+    ON CONFLICT (id) DO NOTHING;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```
+
+### Flusso creazione utente dall'admin
+
+1. Admin crea profilo nella tabella `utenti` (UUID generato, username, ruolo)
+2. Admin associa i club tramite `utenti_club`
+3. L'utente va su `/login` → "Crea Profilo" → si registra con lo **stesso username**
+4. Il trigger aggiorna l'ID del profilo con l'UUID reale di `auth.users`
+5. Ora l'utente può fare login
+
+---
+
+## 10. Strumenti Extra
 
 | File | Descrizione |
 |---|---|
@@ -211,7 +277,7 @@ VITE_APP_URL=https://servicescore.vercel.app
 
 ---
 
-## 10. Flusso di Lavoro Quotidiano
+## 11. Flusso di Lavoro Quotidiano
 
 ### Sviluppo Locale
 
@@ -239,7 +305,7 @@ git push origin main    # Vercel fa deploy automatico
 
 ---
 
-## 11. Pannello Admin — Sezioni
+## 12. Pannello Admin — Sezioni
 
 ### Classifica
 Classifica completa di tutti i club senza filtri.
@@ -248,7 +314,10 @@ Classifica completa di tutti i club senza filtri.
 CRUD completo dei Lions Club (aggiungi, modifica nome, elimina).
 
 ### Service
-CRUD dei tipi di Service (aggiungi, modifica nome, elimina).
+- **Seleziona club**: tendina per scegliere un club
+- **Service per club**: mostra tutti i service inseriti per il club selezionato (data, referente, punteggio)
+- **Nuovo service**: pulsante per avviare il wizard di inserimento (con club pre-selezionato)
+- **CRUD tipi service**: aggiungi, modifica, elimina tipi di service
 
 ### Regole
 Gestione delle relazioni Service → Parametri → Range → Punti Max.
@@ -256,13 +325,14 @@ Ogni regola definisce: per un certo tipo service, un certo parametro ha range mi
 
 ### Utenti
 - **Crea utente**: inserisce username + ruolo nella tabella utenti
+- **Associa club alla creazione**: seleziona i club da associare PRIMA di creare l'utente
 - **Cambia ruolo**: admin ↔ referente
-- **Associa club**: toggle per collegare/scollegare un referente ai club
-- L'utente creato dall'admin deve poi registrarsi da solo (Crea Profilo) per ottenere le credenziali
+- **Associa/scollega club**: toggle su ogni utente esistente
+- L'utente creato dall'admin deve poi registrarsi (Crea Profilo) per attivare l'accesso
 
 ---
 
-## 12. Tema e Dark Mode
+## 13. Tema e Dark Mode
 
 - **3 modalità**: Chiaro, Scuro, Sistema (segue le preferenze del dispositivo)
 - **Persistenza**: la scelta viene salvata in localStorage
@@ -271,7 +341,7 @@ Ogni regola definisce: per un certo tipo service, un certo parametro ha range mi
 
 ---
 
-## 13. Sicurezza
+## 14. Sicurezza
 
 - **Autenticazione**: Supabase Auth (email/password)
 - **Row Level Security (RLS)**: configurata su Supabase per controllare l'accesso ai dati

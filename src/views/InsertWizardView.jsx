@@ -165,20 +165,21 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
         </aside>
 
         {/* Contenuto */}
-        <section className="flex-1 p-6 sm:p-16 overflow-y-auto bg-white/20 dark:bg-transparent text-brand-dark dark:text-white">
+        <section className="flex-1 p-4 sm:p-8 sm:pt-6 overflow-y-auto bg-white/20 dark:bg-transparent text-brand-dark dark:text-white">
           <div className="max-w-3xl mx-auto pb-32 lg:pb-0">
             {/* STEP 1 */}
             {step === 1 && (
-              <div className="space-y-10 sm:space-y-12 animate-in fade-in slide-in-from-right-8 duration-500">
-                <div className="space-y-4 text-center sm:text-left">
+              <div className="space-y-8 sm:space-y-10 animate-in fade-in slide-in-from-right-8 duration-500">
+                <div className="space-y-3 text-center sm:text-left">
                   <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter text-brand-blue dark:text-white leading-tight">
-                    Configura<br /><span className="text-brand-red dark:text-brand-yellow">Analisi</span>
+                    Configura<br />
+                    <span className="text-brand-red dark:text-brand-yellow">Analisi</span>
                   </h2>
                   <p className="text-slate-600 dark:text-slate-300 font-medium text-base sm:text-lg italic">
                     Seleziona i dati per la nuova valutazione ufficiale.
                   </p>
                 </div>
-                <div className="space-y-8 bg-white dark:bg-white/[0.08] p-12 rounded-[3.5rem] border border-slate-200 dark:border-white/20 shadow-2xl">
+                <div className="space-y-6 bg-white dark:bg-white/[0.08] p-8 sm:p-10 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
                   {/* Club */}
                   <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-brand-blue/60 dark:text-brand-yellow ml-2">Lions Club</label>
