@@ -20,7 +20,7 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
     const fetchLeaderboard = async () => {
       const { data, error } = await supabase
         .from('service_inseriti')
-        .select(`punteggio_totale, id_club, club(nome)`);
+        .select(`punteggio_totale, id_club, club(nome, logo_url)`);
 
       if (error) {
         console.error('Errore fetch classifica:', error);
@@ -35,13 +35,17 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
 
         const scores = filtered.reduce((acc, item) => {
           const name = item.club?.nome || `Club ID: ${item.id_club}`;
-          acc[name] = (acc[name] || 0) + (item.punteggio_totale || 0);
+          const logo = item.club?.logo_url || null;
+          if (!acc[name]) {
+            acc[name] = { score: 0, logo };
+          }
+          acc[name].score += (item.punteggio_totale || 0);
           return acc;
         }, {});
 
         setLeaderboard(
           Object.entries(scores)
-            .map(([nome, score]) => ({ nome, score }))
+            .map(([nome, data]) => ({ nome, score: data.score, logo: data.logo }))
             .sort((a, b) => b.score - a.score)
         );
       }
@@ -116,38 +120,44 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
                       />
                     </div>
 
-                    <div className="flex items-center justify-between relative z-10">
-                      <div className="flex items-center gap-4 sm:gap-6">
-                        {/* Position badge with icons */}
-                        <div className={`relative w-14 h-14 flex items-center justify-center rounded-[1.25rem] font-black text-xl shadow-inner transition-transform group-hover:scale-110 ${
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 relative z-10">
+                      <div className="flex items-center gap-3 sm:gap-6">
+                        {/* Position badge with icons or club logo */}
+                        <div className={`relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-[1rem] sm:rounded-[1.25rem] font-black text-lg sm:text-xl shadow-inner transition-transform group-hover:scale-110 shrink-0 overflow-hidden ${
                           i === 0 
                             ? 'bg-gradient-to-br from-brand-yellow to-amber-500 text-brand-dark' 
                             : i === 1 
                             ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-slate-700'
                             : 'bg-slate-50 dark:bg-white/10 text-brand-blue dark:text-white border dark:border-white/20'
                         }`}>
-                          {i === 0 && (
-                            <span className="absolute -top-2 -right-2 text-lg">👑</span>
+                          {item.logo ? (
+                            <img src={item.logo} alt={item.nome} className="w-full h-full object-cover" />
+                          ) : (
+                            <>
+                              {i === 0 && (
+                                <span className="absolute -top-2 -right-2 text-base sm:text-lg">👑</span>
+                              )}
+                              {i === 1 && (
+                                <span className="absolute -top-2 -right-2 text-base sm:text-lg">🥈</span>
+                              )}
+                              {i === 2 && (
+                                <span className="absolute -top-2 -right-2 text-base sm:text-lg">🥉</span>
+                              )}
+                              {i > 2 && `#${i + 1}`}
+                            </>
                           )}
-                          {i === 1 && (
-                            <span className="absolute -top-2 -right-2 text-lg">🥈</span>
-                          )}
-                          {i === 2 && (
-                            <span className="absolute -top-2 -right-2 text-lg">🥉</span>
-                          )}
-                          {i > 2 && `#${i + 1}`}
                         </div>
                         
-                        <span className="text-lg font-black uppercase tracking-tight truncate max-w-[150px] sm:max-w-none">
+                        <span className="text-sm sm:text-lg font-black uppercase tracking-tight">
                           {item.nome}
                         </span>
                       </div>
                       
-                      <div className="text-right">
-                        <div className={`text-3xl font-black leading-none ${i === 0 ? 'text-brand-yellow drop-shadow-md' : 'text-brand-blue dark:text-white'}`}>
+                      <div className="text-right sm:text-left pl-14 sm:pl-0">
+                        <div className={`text-2xl sm:text-3xl font-black leading-none ${i === 0 ? 'text-brand-yellow drop-shadow-md' : 'text-brand-blue dark:text-white'}`}>
                           {item.score.toFixed(1)}
                         </div>
-                        <div className="text-[9px] font-black uppercase text-brand-red dark:text-brand-yellow tracking-widest mt-1">Punti Totali</div>
+                        <div className="text-[9px] font-black uppercase text-brand-red dark:text-brand-yellow tracking-widest mt-1">Punti</div>
                       </div>
                     </div>
 

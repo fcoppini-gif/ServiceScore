@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Plus, Trash2, Edit3, Save, X, Trophy, Users, Building2, Layers, Settings, Activity,
-  Link2, Unlink, ArrowRight,
+  Link2, Unlink, ArrowRight, Upload,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
@@ -54,14 +54,18 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   // FETCH
   // =========================================================================
   const fetchLeaderboard = async () => {
-    const { data } = await supabase.from('service_inseriti').select(`punteggio_totale, id_club, club(nome)`);
+    const { data } = await supabase.from('service_inseriti').select(`punteggio_totale, id_club, club(nome, logo_url)`);
     if (data) {
       const scores = data.reduce((acc, item) => {
         const name = item.club?.nome || `Club ID: ${item.id_club}`;
-        acc[name] = (acc[name] || 0) + (item.punteggio_totale || 0);
+        const logo = item.club?.logo_url || null;
+        if (!acc[name]) {
+          acc[name] = { score: 0, logo };
+        }
+        acc[name].score += (item.punteggio_totale || 0);
         return acc;
       }, {});
-      setLeaderboard(Object.entries(scores).map(([nome, score]) => ({ nome, score })).sort((a, b) => b.score - a.score));
+      setLeaderboard(Object.entries(scores).map(([nome, data]) => ({ nome, score: data.score, logo: data.logo })).sort((a, b) => b.score - a.score));
     }
   };
 
@@ -145,6 +149,18 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
     if (!confirm('Eliminare questo club?')) return;
     await supabase.from('club').delete().eq('id', id);
     toast.success('Club eliminato');
+    fetchClubs();
+  };
+
+  const uploadClubLogo = async (clubId, file) => {
+    if (!file) return;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `club_${clubId}_${Date.now()}.${fileExt}`;
+    const { data, error } = await supabase.storage.from('avatars').upload(fileName, file);
+    if (error) { toast.error('Errore upload'); return; }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(data.path);
+    await supabase.from('club').update({ logo_url: publicUrl }).eq('id', clubId);
+    toast.success('Logo caricato!');
     fetchClubs();
   };
 
@@ -339,9 +355,15 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
             ) : leaderboard.map((item, i) => (
               <div key={i} className="flex items-center justify-between p-6 bg-white dark:bg-white/[0.08] rounded-[2.5rem] border border-slate-200 dark:border-white/20 shadow-sm">
                 <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 flex items-center justify-center rounded-[1.25rem] font-black text-xl shadow-inner ${
+                  <div className={`w-14 h-14 flex items-center justify-center rounded-[1.25rem] font-black text-xl shadow-inner overflow-hidden ${
                     i === 0 ? 'bg-gradient-to-br from-brand-yellow to-amber-500 text-brand-dark' : i === 1 ? 'bg-slate-300 text-slate-700' : 'bg-slate-50 dark:bg-white/10 text-brand-blue dark:text-white'
-                  }`}>#{i + 1}</div>
+                  }`}>
+                    {item.logo ? (
+                      <img src={item.logo} alt={item.nome} className="w-full h-full object-cover" />
+                    ) : (
+                      `#${i + 1}`
+                    )}
+                  </div>
                   <span className="text-lg font-black uppercase tracking-tight">{item.nome}</span>
                 </div>
                 <div className="text-3xl font-black text-brand-blue dark:text-white">{item.score.toFixed(1)}</div>
@@ -360,7 +382,21 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
               <button onClick={addClub} className="px-6 py-4 bg-brand-blue text-white rounded-2xl font-black cursor-pointer border-none hover:shadow-xl active:scale-95 transition-all"><Plus size={20} /></button>
             </div>
             {clubs.map((club) => (
-              <div key={club.id} className="flex items-center justify-between p-5 bg-white dark:bg-white/[0.08] rounded-2xl border border-slate-200 dark:border-white/20 shadow-sm">
+              <div key={club.id} className="flex items-center gap-4 p-4 bg-white dark:bg-white/[0.08] rounded-2xl border border-slate-200 dark:border-white/20 shadow-sm">
+                {/* Logo club */}
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-white/10 shrink-0">
+                  {club.logo_url ? (
+                    <img src={club.logo_url} alt={club.nome} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <Building2 size={20} />
+                    </div>
+                  )}
+                  <label className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadClubLogo(club.id, e.target.files[0])} />
+                    <Upload size={14} className="text-white" />
+                  </label>
+                </div>
                 {editingClub === club.id ? (
                   <div className="flex gap-2 flex-1">
                     <input type="text" value={editClubName} onChange={(e) => setEditClubName(e.target.value)} className="flex-1 px-4 py-2 bg-slate-100 dark:bg-black/50 rounded-xl text-brand-dark dark:text-white outline-none font-bold" autoFocus />
@@ -369,7 +405,7 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
                   </div>
                 ) : (
                   <>
-                    <span className="font-bold text-lg">{club.nome}</span>
+                    <span className="font-bold text-lg flex-1">{club.nome}</span>
                     <div className="flex gap-2">
                       <button onClick={() => { setEditingClub(club.id); setEditClubName(club.nome); }} className="p-2 bg-slate-200 dark:bg-white/15 rounded-xl cursor-pointer border-none text-brand-blue dark:text-white"><Edit3 size={16} /></button>
                       <button onClick={() => deleteClub(club.id)} className="p-2 bg-red-100 dark:bg-brand-red/25 rounded-xl cursor-pointer border-none text-brand-red"><Trash2 size={16} /></button>
