@@ -7,17 +7,20 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Plus, Shield, Download } from 'lucide-react';
+import { Trophy, Plus, Shield, Download, BarChart3 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSwitcher }) {
   const navigate = useNavigate();
   const [leaderboard, setLeaderboard] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showStats, setShowStats] = useState(false);
+  const [statsData, setStatsData] = useState({ servicesByMonth: [], servicesByType: [], topClubs: [] });
 
   const exportPDF = () => {
     const doc = new jsPDF();
@@ -83,9 +86,155 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
     fetchLeaderboard();
   }, [userClubs, isAdmin]);
 
+  // Fetch statistics
+  useEffect(() => {
+    const fetchStats = async () => {
+      const { data: services } = await supabase
+        .from('service_inseriti')
+        .select('data_inserimento, punteggio_totale, id_club, club(nome), tipi_service(nome)')
+        .order('data_inserimento');
+      
+      if (!services || services.length === 0) return;
+      
+      let filteredServices = services;
+      if (!isAdmin && userClubs.length > 0) {
+        filteredServices = services.filter((s) => userClubs.includes(s.id_club));
+      }
+      
+      const byMonth = {};
+      const byType = {};
+      
+      filteredServices.forEach((s) => {
+        const date = new Date(s.data_inserimento);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        byMonth[monthKey] = (byMonth[monthKey] || 0) + 1;
+        
+        const typeName = s.tipi_service?.nome || 'Altro';
+        byType[typeName] = (byType[typeName] || 0) + 1;
+      });
+      
+      const servicesByMonth = Object.entries(byMonth)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([month, count]) => ({ month, service: count }));
+      
+      const servicesByType = Object.entries(byType)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+      
+      const clubScores = {};
+      filteredServices.forEach((s) => {
+        const clubName = s.club?.nome || 'Sconosciuto';
+        clubScores[clubName] = (clubScores[clubName] || 0) + (s.punteggio_totale || 0);
+      });
+      
+      const topClubs = Object.entries(clubScores)
+        .map(([name, score]) => ({ name, score: Math.round(score) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 6);
+      
+      setStatsData({ servicesByMonth, servicesByType, topClubs });
+    };
+    
+    fetchStats();
+  }, [isAdmin, userClubs]);
+
+  if (showStats) {
+    return (
+      <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500">
+        <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
+        
+        <div className="max-w-5xl mx-auto p-4 sm:p-12 space-y-8 pb-24 text-brand-dark dark:text-white animate-fade-in-up">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setShowStats(false)}
+              className="cursor-pointer bg-brand-blue dark:bg-brand-yellow text-white dark:text-brand-dark font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg hover:scale-105 transition-all border-none"
+            >
+              ← Classifica
+            </button>
+          </div>
+          
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-black uppercase tracking-tight bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow bg-clip-text text-transparent">Le Tue Statistiche</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest">Dashboard Interattiva</p>
+          </div>
+          
+          {/* KPI */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-gradient-to-br from-brand-blue to-brand-blue/80 p-6 rounded-[2rem] text-white shadow-xl">
+              <div className="text-3xl font-black">{statsData.servicesByMonth.reduce((a, b) => a + b.service, 0)}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Service Totali</div>
+            </div>
+            <div className="bg-gradient-to-br from-brand-red to-brand-red/80 p-6 rounded-[2rem] text-white shadow-xl">
+              <div className="text-3xl font-black">{statsData.servicesByType.length}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Tipologie</div>
+            </div>
+            <div className="bg-gradient-to-br from-brand-yellow to-amber-500 p-6 rounded-[2rem] text-brand-dark shadow-xl">
+              <div className="text-3xl font-black">{statsData.topClubs[0]?.score || 0}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Punteggio Max</div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-600 to-purple-600/80 p-6 rounded-[2rem] text-white shadow-xl">
+              <div className="text-3xl font-black">{statsData.topClubs.length}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Club Attivi</div>
+            </div>
+          </div>
+          
+          {/* Grafici */}
+          {statsData.servicesByMonth.length > 0 && (
+            <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
+              <h3 className="text-lg font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-6">Trend Mensile</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={statsData.servicesByMonth}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,51,160,0.1)" />
+                  <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <Tooltip />
+                  <Bar dataKey="service" fill="#0033A0" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {statsData.servicesByType.length > 0 && (
+              <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
+                <h3 className="text-lg font-black uppercase tracking-widest text-brand-red dark:text-brand-yellow mb-6">Tipologie</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={statsData.servicesByType} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={70}>
+                      {statsData.servicesByType.map((_, i) => (
+                        <Cell key={i} fill={['#0033A0', '#E31837', '#FFC72C', '#28A745', '#6F42C1'][i % 5]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            
+            {statsData.topClubs.length > 0 && (
+              <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
+                <h3 className="text-lg font-black uppercase tracking-widest text-brand-yellow mb-6">Top Club</h3>
+                <div className="space-y-3">
+                  {statsData.topClubs.slice(0, 4).map((club, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <span className={`font-black text-sm w-6 ${i === 0 ? 'text-brand-yellow' : 'text-slate-400'}`}>#{i + 1}</span>
+                      <div className="flex-1 h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-brand-blue" style={{ width: `${(club.score / statsData.topClubs[0].score) * 100}%` }} />
+                      </div>
+                      <span className="text-sm font-bold">{club.score}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500">
-      <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
 
       <div className="max-w-5xl mx-auto p-4 sm:p-12 space-y-10 pb-24 text-brand-dark dark:text-white">
         {/* HERO */}
@@ -106,6 +255,12 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
               >
                 <Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1" />
                 NUOVA ANALISI
+              </button>
+              <button
+                onClick={() => setShowStats(!showStats)}
+                className="w-full sm:w-auto cursor-pointer bg-brand-yellow text-brand-dark font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover:scale-105 hover-glow transition-all text-sm border-none glow-yellow"
+              >
+                <BarChart3 size={20} /> {showStats ? 'CLASSIFICA' : 'STATISTICHE'}
               </button>
               {isAdmin && (
                 <button
