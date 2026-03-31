@@ -14,6 +14,7 @@
   
   --animate-gradient: gradient 2s linear infinite;
   --animate-slide-up: slide-up 0.3s ease-out;
+  --animate-spin-slow: spin 3s linear infinite;
   
   @keyframes gradient {
     0% { background-position: 0% 50%; }

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth';
 import useToast from './hooks/useToast';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import LoadingScreen from './components/LoadingScreen';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
 import InsertWizardView from './views/InsertWizardView';
@@ -18,6 +19,7 @@ function AppContent() {
   const { user, userProfile, isAdmin, userClubs, loading, refresh } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system');
   const [resolvedTheme, setResolvedTheme] = useState('dark');
+  const [isAppReady, setIsAppReady] = useState(false);
   const { toast, ToastContainer } = useToast();
 
   // Redirect new visitors to installazione.html ONLY on first visit AND only from browser (not installed app)
@@ -103,12 +105,10 @@ function AppContent() {
     [theme]
   );
 
-  if (loading)
-    return (
-      <div className="h-screen flex flex-col items-center justify-center bg-slate-100 dark:bg-[#060D1F]">
-        <div className="w-16 h-16 border-4 border-[#0033A0] border-t-[#FFC72C] rounded-full animate-spin"></div>
-      </div>
-    );
+  // Schermata di caricamento con logo rotante
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   // Props comuni per tutte le view autenticate
   const authProps = {
