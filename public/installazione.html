@@ -116,8 +116,8 @@
     </div>
 
     <script>
-        // Imposta automaticamente l'URL dell'app
-        const appUrl = window.location.href.replace('/installazione.html', '/');
+        // Imposta automaticamente l'URL dell'app (vai al login, non alla home)
+        const appUrl = window.location.origin + '/login?from=install';
         document.getElementById('open-browser-btn').href = appUrl;
 
         // Logica per rilevare il sistema operativo

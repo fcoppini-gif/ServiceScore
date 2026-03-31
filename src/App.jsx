@@ -24,14 +24,18 @@ function AppContent() {
   useEffect(() => {
     if (loading) return;
     const hasVisited = localStorage.getItem('hasVisited');
-    // Check if app is installed (standalone mode)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    // Only redirect if: never visited AND not logged in AND not installed
+    const isStandalone = window.matchMedia('display-mode: standalone').matches;
+    const fromInstall = new URLSearchParams(window.location.search).get('from') === 'install';
+    
+    // Se arriva da "Apri nel Browser", salta il redirect
+    if (fromInstall) {
+      localStorage.setItem('hasVisited', 'true');
+      return;
+    }
+    
     if (!hasVisited && !user && isStandalone) {
-      // App installed but first visit - just mark as visited, don't redirect
       localStorage.setItem('hasVisited', 'true');
     } else if (!hasVisited && !user && !isStandalone) {
-      // Not installed and not logged in - redirect to installazione
       window.location.href = '/installazione.html';
     } else if (user) {
       localStorage.setItem('hasVisited', 'true');
