@@ -1,7 +1,7 @@
 // =============================================================================
 // COMPONENTE PRINCIPALE - Entry point dell'applicazione React
 // =============================================================================
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth';
 import useToast from './hooks/useToast';
@@ -21,14 +21,23 @@ function AppContent() {
   const { toast, ToastContainer } = useToast();
 
   // Redirect new visitors to installazione.html ONLY on first visit AND only from browser (not installed app)
+  const redirectProcessed = useRef(false);
+  
   useEffect(() => {
-    if (loading) return;
+    if (loading || redirectProcessed.current) return;
+    redirectProcessed.current = true;
+    
     const hasVisited = localStorage.getItem('hasVisited');
     const isStandalone = window.matchMedia('display-mode: standalone').matches;
-    const fromInstall = new URLSearchParams(window.location.search).get('from') === 'install';
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromInstall = urlParams.get('from') === 'install';
+    const currentPath = window.location.pathname;
     
-    // Se arriva da "Apri nel Browser", salta il redirect
+    console.log('[App] Redirect check:', { hasVisited, isStandalone, fromInstall, currentPath });
+    
+    // Se arriva da "Apri nel Browser" - vai direttamente al login senza redirect
     if (fromInstall) {
+      console.log('[App] Coming from install, skip redirect');
       localStorage.setItem('hasVisited', 'true');
       // Rimuovi il parametro dalla URL
       const url = new URL(window.location.href);
@@ -37,11 +46,18 @@ function AppContent() {
       return;
     }
     
-    if (!hasVisited && !user && isStandalone) {
-      localStorage.setItem('hasVisited', 'true');
-    } else if (!hasVisited && !user && !isStandalone) {
+    // Se è già sulla pagina installazione.html, non fare nulla
+    if (currentPath === '/installazione.html') {
+      console.log('[App] Already on installazione.html, stay here');
+      return;
+    }
+    
+    if (!hasVisited && !user && !isStandalone) {
+      console.log('[App] Redirecting to installazione.html');
       window.location.href = '/installazione.html';
     } else if (user) {
+      localStorage.setItem('hasVisited', 'true');
+    } else {
       localStorage.setItem('hasVisited', 'true');
     }
   }, [loading, user]);
