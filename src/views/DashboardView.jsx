@@ -244,69 +244,69 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
     <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 aurora-bg">
       <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
 
-      <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-12 space-y-10 pb-24 text-brand-dark dark:text-white">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 pt-8 pb-24 space-y-8 text-brand-dark dark:text-white">
         {/* HERO */}
-        <div className="p-10 rounded-[3.5rem] bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/20 relative overflow-hidden shadow-xl group animate-fade-in-up hover-magnetic">
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-blue/5 dark:bg-brand-blue/15 rounded-full blur-3xl group-hover:bg-brand-blue/20 transition-all duration-700"></div>
-          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-brand-yellow/10 dark:bg-brand-yellow/5 rounded-full blur-3xl"></div>
-          <div className="relative z-10 text-center sm:text-left">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red dark:text-brand-yellow mb-3 font-bold shimmer-text">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-white to-slate-50 dark:from-white/[0.06] dark:to-transparent border border-slate-200/60 dark:border-white/[0.06] shadow-lg group animate-fade-in-up">
+          {/* Background accent */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-brand-blue/[0.04] dark:bg-brand-blue/[0.08] rounded-full blur-[80px] group-hover:bg-brand-blue/[0.06] dark:group-hover:bg-brand-blue/[0.12] transition-all duration-1000"></div>
+          <div className="absolute bottom-0 left-0 w-56 h-56 bg-brand-yellow/[0.05] dark:bg-brand-yellow/[0.06] rounded-full blur-[60px]"></div>
+          <div className="relative z-10 p-8 sm:p-10 text-center sm:text-left">
+            <h2 className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] text-brand-red/80 dark:text-brand-yellow/70 mb-2">
               Lions District Network
             </h2>
-            <h1 className="text-4xl lg:text-5xl font-black tracking-tighter mb-10 uppercase">
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tighter mb-8 uppercase text-brand-dark dark:text-white">
               {isAdmin ? 'Classifica Completa' : 'La Mia Classifica'}
             </h1>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => navigate('/insert')}
-                className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-10 py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover-lift transition-all text-lg border-none glow-blue"
+                className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-8 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-brand-blue/20 dark:shadow-none hover-lift transition-all text-sm border-none"
               >
-                <Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1" />
-                NUOVA ANALISI
+                <Plus size={20} /> NUOVA ANALISI
+              </button>
+              <button
+                onClick={() => setShowStats(!showStats)}
+                className="w-full sm:w-auto cursor-pointer bg-brand-yellow text-brand-dark font-black px-7 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-brand-yellow/15 hover-lift transition-all text-sm border-none"
+              >
+                <BarChart3 size={18} /> {showStats ? 'CLASSIFICA' : 'STATISTICHE'}
               </button>
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin/classifica')}
-                  className="w-full sm:w-auto cursor-pointer bg-brand-red text-white font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover-lift transition-all text-sm border-none glow-red"
+                  className="w-full sm:w-auto cursor-pointer bg-brand-red text-white font-black px-7 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-brand-red/15 hover-lift transition-all text-sm border-none"
                 >
-                  <Shield size={20} /> ADMIN
+                  <Shield size={18} /> ADMIN
                 </button>
               )}
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className="w-full sm:w-auto cursor-pointer bg-brand-yellow text-brand-dark font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover-lift transition-all text-sm border-none glow-yellow"
-              >
-                <BarChart3 size={20} /> {showStats ? 'CLASSIFICA' : 'STATISTICHE'}
-              </button>
             </div>
           </div>
         </div>
 
         {/* LEADERBOARD */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ml-4">
-            <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-              <Trophy className="text-brand-yellow drop-shadow-sm" /> Ranking Live
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2.5">
+              <Trophy size={20} className="text-brand-yellow" /> Ranking Live
             </h3>
-            <div className="flex gap-3">
+            <div className="flex gap-2.5">
               <input
                 type="text"
                 placeholder="Cerca club..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/20 text-brand-dark dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-brand-blue"
+                className="px-4 py-2.5 rounded-2xl text-sm font-bold bg-white dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.06] text-brand-dark dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 outline-none focus:border-brand-blue/30 dark:focus:border-brand-yellow/20 transition-all"
               />
               <button
                 onClick={exportPDF}
-                className="px-4 py-2 bg-brand-blue dark:bg-brand-yellow text-white dark:text-brand-dark rounded-xl font-black text-sm flex items-center gap-2 cursor-pointer border-none hover:shadow-lg transition-all"
+                className="px-4 py-2.5 bg-brand-blue/10 dark:bg-brand-yellow/10 text-brand-blue dark:text-brand-yellow rounded-2xl font-black text-sm flex items-center gap-2 cursor-pointer border-none hover:bg-brand-blue/15 dark:hover:bg-brand-yellow/15 transition-all"
               >
-                <Download size={16} /> PDF
+                <Download size={15} /> PDF
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-4 font-bold">
+          <div className="grid grid-cols-1 gap-3">
             {leaderboard.length === 0 ? (
-              <div className="text-center p-16 bg-white dark:bg-white/[0.08] rounded-[3rem] border border-dashed border-slate-300 dark:border-white/20 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs italic">
+              <div className="text-center p-16 bg-slate-50 dark:bg-white/[0.02] rounded-[2rem] border border-dashed border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest text-xs italic">
                 {isAdmin ? 'Nessun dato presente.' : 'Nessun dato per i tuoi club.'}
               </div>
             ) : (
@@ -318,16 +318,16 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
                 return (
                   <div 
                     key={i} 
-                    className={`relative overflow-hidden p-6 rounded-[2.5rem] border transition-all shadow-sm group stagger-item hover-magnetic ${
+                    className={`relative overflow-hidden p-5 sm:p-6 rounded-[2rem] border transition-all shadow-sm group stagger-item hover-magnetic ${
                       i === 0 
-                        ? 'bg-gradient-to-r from-brand-yellow/20 to-transparent dark:from-brand-yellow/10 border-brand-yellow/50 shadow-[0_0_30px_rgba(255,199,44,0.3)]' 
-                        : 'bg-white dark:bg-white/[0.08] border-slate-200 dark:border-white/20'
+                        ? 'bg-gradient-to-r from-brand-yellow/10 to-transparent dark:from-brand-yellow/[0.05] border-brand-yellow/30 dark:border-brand-yellow/20' 
+                        : 'bg-white dark:bg-white/[0.03] border-slate-200/60 dark:border-white/[0.04]'
                     }`}
                   >
-                    {/* Progress bar background */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-200 dark:bg-white/10">
+                    {/* Progress bar */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-100 dark:bg-white/[0.04]">
                       <div 
-                        className={`h-full transition-all duration-1000 ${i === 0 ? 'bg-brand-yellow' : 'bg-brand-blue'}`}
+                        className={`h-full rounded-full transition-all duration-1000 ${i === 0 ? 'bg-gradient-to-r from-brand-yellow to-amber-400' : 'bg-gradient-to-r from-brand-blue to-brand-blue/60'}`}
                         style={{ width: `${progress}%` }}
                       />
                     </div>

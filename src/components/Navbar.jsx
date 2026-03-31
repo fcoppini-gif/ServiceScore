@@ -29,10 +29,10 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
   const avatarUrl = userProfile?.avatar_url || null;
 
   return (
-    <nav className="px-6 py-4 sm:py-5 flex justify-between items-center border-b border-slate-200 dark:border-white/5 bg-white/80 dark:bg-white/5 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
-      {/* Logo: cliccabile → porta alla dashboard */}
+    <nav className="px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center border-b border-slate-100 dark:border-white/[0.03] bg-white/90 dark:bg-brand-dark/80 backdrop-blur-2xl sticky top-0 z-50">
+      {/* Logo */}
       <button onClick={() => navigate('/dashboard')} className="cursor-pointer bg-transparent border-none">
-        <BrandLogo className="h-8 sm:h-10" />
+        <BrandLogo className="h-7 sm:h-9" />
       </button>
 
       {/* Link admin (visibili solo se admin) */}

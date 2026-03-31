@@ -78,32 +78,33 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
       </div>
       
       {/* Toggle tema in alto */}
-      <div className="mb-8 z-50">
+      <div className="mb-6 z-50">
         <ThemeSwitcher />
       </div>
-      {/* Card principale con bordo gradiente brand */}
-      <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden animate-scale-in">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C] bg-[length:200%_100%] animate-shimmer"></div>
+      {/* Card principale */}
+      <div className="z-10 w-full max-w-[420px] bg-white/90 dark:bg-brand-dark/80 backdrop-blur-3xl border border-slate-200/60 dark:border-white/[0.06] p-6 sm:p-10 rounded-[2.5rem] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_80px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden animate-scale-in">
+        {/* Top gradient accent */}
+        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C] bg-[length:200%_100%] animate-shimmer"></div>
         {!confirmationSent ? (
           <>
-            <BrandLogo className="h-14 sm:h-20 mb-10" />
-            <h1 className="text-2xl font-black text-brand-blue dark:text-white uppercase tracking-tighter mb-1 text-center">
+            <BrandLogo className="h-12 sm:h-16 mb-8" />
+            <h1 className="text-3xl font-black text-brand-blue dark:text-white uppercase tracking-tighter mb-1 text-center">
               {authMode === 'login' ? 'Area Riservata' : 'Registrazione'}
             </h1>
-            <p className="text-center text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-[0.4em] mb-10 font-bold italic">
+            <p className="text-center text-slate-400 dark:text-slate-500 text-[9px] uppercase tracking-[0.35em] mb-8 font-bold">
               {authMode === 'login' ? 'Sincronizzazione Operatore' : 'Crea Profilo 01Informatica'}
             </p>
-            {/* Messaggio errore inline (sostituisce alert) */}
+            {/* Messaggio errore */}
             {error && (
-              <div className="mb-4 p-3 bg-brand-red/10 border border-brand-red/30 rounded-2xl text-brand-red text-sm font-bold text-center">
+              <div className="mb-4 p-3 bg-brand-red/8 border border-brand-red/20 rounded-2xl text-brand-red text-sm font-bold text-center">
                 {error}
               </div>
             )}
-            <form onSubmit={handleAuth} className="space-y-4 text-brand-dark">
+            <form onSubmit={handleAuth} className="space-y-3">
               {/* Campo Username: visibile solo in registrazione */}
               {authMode === 'signup' && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-500 ml-2 font-bold">
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-400 ml-3">
                     Referente / Club
                   </label>
                   <input
@@ -111,14 +112,14 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                     placeholder="Nome o Club..."
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-4 pr-4 py-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold"
+                    className="w-full pl-4 pr-4 py-3.5 bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/50 dark:border-white/[0.06] rounded-2xl text-brand-dark dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 outline-none focus:border-brand-blue/40 dark:focus:border-brand-yellow/30 focus:bg-white dark:focus:bg-white/[0.05] transition-all font-bold text-sm"
                     required
                   />
                 </div>
               )}
               {/* Campo Email */}
-              <div className="space-y-1 text-brand-dark">
-                <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-500 ml-2 font-bold">
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-400 ml-3">
                   Email
                 </label>
                 <input
@@ -127,13 +128,13 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  className="w-full pl-4 pr-4 py-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold"
+                  className="w-full pl-4 pr-4 py-3.5 bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/50 dark:border-white/[0.06] rounded-2xl text-brand-dark dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 outline-none focus:border-brand-blue/40 dark:focus:border-brand-yellow/30 focus:bg-white dark:focus:bg-white/[0.05] transition-all font-bold text-sm"
                   required
                 />
               </div>
               {/* Campo Password */}
-              <div className="space-y-1 text-brand-dark">
-                <label className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-500 ml-2 font-bold">
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-brand-blue dark:text-slate-400 ml-3">
                   Password
                 </label>
                 <input
@@ -142,15 +143,15 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
-                  className="w-full pl-4 pr-4 py-4 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl text-brand-dark dark:text-white outline-none focus:ring-2 focus:ring-[#FFC72C] font-bold"
+                  className="w-full pl-4 pr-4 py-3.5 bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/50 dark:border-white/[0.06] rounded-2xl text-brand-dark dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 outline-none focus:border-brand-blue/40 dark:focus:border-brand-yellow/30 focus:bg-white dark:focus:bg-white/[0.05] transition-all font-bold text-sm"
                   required
                 />
               </div>
-              {/* Pulsante submit: cambia testo in base a login/signup, mostra spinner se submitting */}
+              {/* Pulsante submit */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full cursor-pointer bg-brand-blue hover:bg-blue-800 dark:bg-gradient-to-r dark:from-[#0033A0] dark:via-[#E31837] dark:to-[#FFC72C] text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl active:scale-95 hover-lift transition-all mt-4 flex justify-center items-center gap-2 border-none"
+                className="w-full cursor-pointer bg-gradient-to-r from-brand-blue to-brand-blue/90 hover:from-brand-blue/90 hover:to-brand-blue text-white font-black py-4 rounded-2xl uppercase tracking-widest shadow-lg shadow-brand-blue/20 dark:bg-gradient-to-r dark:from-[#0033A0] dark:via-[#E31837] dark:to-[#FFC72C] dark:shadow-none active:scale-[0.98] hover-lift transition-all mt-2 flex justify-center items-center gap-2 border-none text-sm"
               >
                 {isSubmitting ? (
                   <Activity className="animate-spin" />
@@ -162,13 +163,13 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
               </button>
             </form>
             {/* Link per switchare tra login e registrazione */}
-            <div className="mt-8 text-center border-t border-slate-100 dark:border-white/5 pt-6">
+            <div className="mt-6 text-center border-t border-slate-100 dark:border-white/[0.03] pt-5">
               <button
                 onClick={() => {
                   setAuthMode(authMode === 'login' ? 'signup' : 'login');
                   setError('');
                 }}
-                className="group flex items-center justify-center gap-3 w-full text-[12px] font-black text-brand-blue dark:text-[#FFC72C] uppercase tracking-widest hover-lift transition-all cursor-pointer p-4 rounded-2xl bg-brand-blue/5 dark:bg-white/5 border border-brand-blue/10 dark:border-[#FFC72C]/20 shadow-md"
+                className="group flex items-center justify-center gap-2 w-full text-[11px] font-black text-brand-blue dark:text-brand-yellow/80 uppercase tracking-widest hover:text-brand-blue dark:hover:text-brand-yellow transition-all cursor-pointer p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.04] hover:border-brand-blue/20 dark:hover:border-brand-yellow/20 hover:shadow-md"
               >
                 {authMode === 'login' ? (
                   <>
