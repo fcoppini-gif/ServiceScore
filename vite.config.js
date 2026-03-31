@@ -6,6 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 const pwaOptions = {
   registerType: 'autoUpdate',
   includeAssets: ['logo_ufficiale.png'],
+  injectRegister: 'inline',
   manifest: {
     name: 'ServiceScore - Lions Club Italia',
     short_name: 'ServiceScore',
