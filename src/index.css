@@ -245,6 +245,7 @@
 /* Aurora: glow morbido che si muove lentamente */
 .aurora-bg {
   position: relative;
+  overflow: hidden;
 }
 .aurora-bg::before {
   content: '';
@@ -383,6 +384,10 @@
 
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+html, body {
+  overflow-x: hidden;
 }
 
 body {
