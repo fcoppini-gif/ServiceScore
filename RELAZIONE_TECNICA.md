@@ -17,6 +17,9 @@
 | React Router DOM | 7.x | Routing |
 | Lucide React | - | Icone SVG |
 | Supabase JS | 2.x | Client database |
+| Recharts | 2.x | Grafici statistiche |
+| jsPDF | 2.x | Esportazione PDF |
+| VitePWA | 0.21 | Service worker offline |
 
 ### Backend
 | Servizio | Descrizione |
@@ -41,7 +44,8 @@ ServiceScore/
 │   │   ├── useAuth.jsx  # Gestione autenticazione
 │   │   └── useToast.jsx # Sistema notifiche
 │   ├── lib/
-│   │   └── supabase.js  # Client Supabase
+│   │   ├── supabase.js  # Client Supabase
+│   │   └── i18n.jsx     # Sistema internazionalizzazione
 │   ├── views/           # Pagine dell'app
 │   │   ├── AdminView.jsx
 │   │   ├── DashboardView.jsx
@@ -55,9 +59,16 @@ ServiceScore/
 ├── public/
 │   ├── logo_ufficiale.png
 │   ├── manifest.json    # Configurazione PWA
-│   └── installazione.html # Pagina installazione
+│   ├── installazione.html
+│   ├── privacy.html
+│   ├── termini.html
+│   ├── contratto.html
+│   ├── offline.html
+│   ├── sw.js           # Service worker
+│   └── genera-qr.js
 ├── package.json
-└── vite.config.js
+├── vite.config.js
+└── DOCUMENTAZIONE.md
 ```
 
 ---
@@ -93,7 +104,8 @@ public.tipi_service
 
 public.parametri
     ├── id (int, PK)
-    └── nome (text)
+    ├── nome (text)
+    └── obbligatorio (boolean) ← NUOVO
 
 public.regole_calcolo
     ├── id (int, PK)
@@ -119,9 +131,19 @@ public.dettaglio_inserimenti
     └── punti_ottenuti (float)
 ```
 
+### Query SQL Utili
+
+```sql
+-- Aggiungi colonna obbligatorio ai parametri
+ALTER TABLE parametri ADD COLUMN obbligatorio BOOLEAN DEFAULT true;
+
+-- Rendi opzionale un parametro
+UPDATE parametri SET obbligatorio = false WHERE id = 1;
+```
+
 ---
 
-## autenticazione
+## Autenticazione
 
 ### Flow Autenticazione
 
@@ -134,7 +156,7 @@ public.dettaglio_inserimenti
 
 | Ruolo | Permessi |
 |-------|----------|
-| `admin` | CRUD completo su tutte le tabelle, gestione utenti |
+| `admin` | CRUD completo su tutte le tabelle, gestione utenti, statistiche |
 | `referente` | Solo i propri club, inserimento service |
 
 ---
@@ -147,14 +169,53 @@ public.dettaglio_inserimenti
 punti = (valore_inserito / range_max) * punti_max
 ```
 
-### Esempio (Progetto Salvo)
+### Logica Parametri Opzionali
 
-| Parametro | Range Max | Punti Max | Valore | Punti |
-|-----------|-----------|-----------|--------|-------|
-| Realizzazione | 1 | 10 | 1 | 10.0 |
-| Originalità | 1 | 5 | 1 | 5.0 |
-| Difficoltà | 5 | 5 | 3 | 3.0 |
-| **TOTALE** | | | | **18.0** |
+- Se `obbligatorio = true`: il parametro deve essere compilato
+- Se `obbligatorio = false`: il parametro è opzionale, se lasciato a 0 non viene calcolato nel punteggio totale
+- Il punteggio massimo possibile (`maxPossibleScore`) viene calcolato solo sui parametri obbligatori
+
+---
+
+## Nuove Funzionalità Implementate
+
+### 1. PDF Export Classifica
+- **File**: `DashboardView.jsx`
+- **Libreria**: jsPDF + jspdf-autotable
+- **Funzione**: `exportPDF()` genera PDF con tabella ranking
+
+### 2. Ricerca Classifica
+- **File**: `DashboardView.jsx`
+- **Stato**: `searchTerm` con filtro `filter()` su leaderboard
+
+### 3. Filtro Anno Service
+- **File**: `AdminView.jsx` (sezione Service)
+- **Stato**: `selectedYear` passato alla query Supabase
+
+### 4. Statistiche Dettagliate
+- **File**: `AdminView.jsx` (nuova sezione "Statistiche")
+- **Libreria**: Recharts (BarChart, PieChart)
+- **Dati**: trend mensile, distribuzione per tipologia, top club
+
+### 5. Backup Dati
+- **File**: `AccountView.jsx`
+- **Funzione**: `handleBackup()` scarica JSON con tutti i service
+
+### 6. Multi-Language (i18n)
+- **File**: `src/lib/i18n.jsx`
+- **Provider**: `I18nProvider` in App.jsx
+- **Toggle**: bottone nella Navbar
+- **Lingue**: Italiano (default), Inglese
+
+### 7. PWA Offline
+- **Configurazione**: `vite.config.js` con `vite-plugin-pwa`
+- **Service Worker**: `public/sw.js`
+- **Offline Page**: `public/offline.html`
+- **Cache**: Workbox con precaching
+
+### 8. Parametri Opzionali
+- **Frontend**: InsertWizardView gestisce logica
+- **Admin**: AdminView permite toggle obbligatorio/opzionale
 
 ---
 
@@ -163,7 +224,7 @@ punti = (valore_inserito / range_max) * punti_max
 ### Query Principali
 
 ```javascript
-// Fetch classifica
+// Fetch classifica con logo
 supabase
   .from('service_inseriti')
   .select('punteggio_totale, id_club, club(nome, logo_url)')
@@ -173,6 +234,19 @@ supabase
   .from('regole_calcolo')
   .select('*, tipi_service(nome), parametri(nome)')
   .eq('id_tipo_service', serviceId)
+
+// Fetch parametri con obbligatorio
+supabase
+  .from('parametri')
+  .select('*')
+
+// Service con filtro anno
+supabase
+  .from('service_inseriti')
+  .select('*, tipi_service(nome)')
+  .eq('id_club', clubId)
+  .gte('data_inserimento', '2026-01-01')
+  .lte('data_inserimento', '2026-12-31')
 
 // Inserisci service
 supabase.from('service_inseriti').insert({
@@ -187,24 +261,31 @@ supabase.from('service_inseriti').insert({
 
 ## PWA e Installazione
 
-### Manifest (manifest.json)
+### Manifest (vite.config.js)
 
 ```json
 {
-  "name": "ServiceScore",
+  "name": "ServiceScore - Lions Club Italia",
   "short_name": "ServiceScore",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0033A0",
   "theme_color": "#0033A0",
-  "icons": [...]
+  "background_color": "#0B132B"
 }
 ```
 
-### Installazione
+### Service Worker
 
-- **iOS**: Safari → Condividi → Aggiungi alla Home
-- **Android**: Chrome → Installa app (se supportato)
+- **File**: `public/sw.js`
+- **Funzionalità**:
+  - Push notifications (struttura ready)
+  - Cache per offline
+  - Precache asset statici
+
+### Offline Mode
+
+- **Page**: `public/offline.html`
+- **Attivazione**: quando non c'è connessione
 
 ---
 
@@ -222,7 +303,7 @@ supabase.from('service_inseriti').insert({
 ### Build Locale
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 npm run build
 npm run preview
 ```
@@ -250,11 +331,13 @@ VITE_APP_URL=https://servicescore.vercel.app
 
 ## ToDo / Miglioramenti Futuri
 
-- [ ] Notifiche push
-- [ ] Esportazione PDF classifiche
-- [ ] Multi-district
-- [ ] Reportistica avanzata
-- [ ] Integrazione email automatiche
+- [x] Notifiche push (struttura ready, richiede configurazione push service)
+- [x] Esportazione PDF classifiche
+- [x] Statistiche dettagliate
+- [x] Multi-lingua
+- [x] Funzionamento offline
+- [ ] Notifiche email (richiede Edge Function Supabase)
+- [ ] Test automatici
 
 ---
 

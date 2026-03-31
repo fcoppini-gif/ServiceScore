@@ -7,7 +7,7 @@
 // =============================================================================
 
 import { useState } from 'react';
-import { Camera, Lock, Activity } from 'lucide-react';
+import { Camera, Lock, Activity, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -77,6 +77,30 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
     }
   };
 
+  const handleBackup = async () => {
+    try {
+      const { data: services } = await supabase.from('service_inseriti').select('*, club(nome), tipi_service(nome)');
+      const { data: details } = await supabase.from('dettaglio_inserimenti').select('*, parametri(nome)');
+      
+      const backup = {
+        exportedAt: new Date().toISOString(),
+        services: services || [],
+        details: details || [],
+      };
+      
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `servicescore_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Backup scaricato');
+    } catch (err) {
+      toast.error('Errore backup: ' + err.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500">
       <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
@@ -130,6 +154,16 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
               {isChangingPassword ? <Activity size={18} className="animate-spin" /> : <><Lock size={18} /> Aggiorna Password</>}
             </button>
           </form>
+        </div>
+
+        {/* BACKUP DATI */}
+        <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[2.5rem] border border-slate-200 dark:border-white/20 shadow-xl">
+          <h2 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-6">Backup Dati</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-300 mb-4">Scarica una copia dei tuoi service inseriti in formato JSON.</p>
+          <button onClick={handleBackup}
+            className="px-6 py-3 bg-brand-blue text-white rounded-xl font-black cursor-pointer border-none hover:shadow-xl active:scale-95 transition-all flex items-center gap-2">
+            <Download size={18} /> Scarica Backup
+          </button>
         </div>
 
         {/* INFO ACCOUNT */}

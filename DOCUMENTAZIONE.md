@@ -329,6 +329,24 @@ UPDATE utenti SET ruolo = 'admin' WHERE id IN (
 );
 ```
 
+### 9. Flag "Obbligatorio" per parametri
+
+```sql
+-- Aggiunge la colonna obbligatorio alla tabella parametri
+-- Se obbligatorio = true: il parametro deve essere compilato
+-- Se obbligatorio = false: il parametro è opzionale (può essere lasciato a 0)
+ALTER TABLE parametri ADD COLUMN obbligatorio BOOLEAN DEFAULT true;
+```
+
+Per modificare il flag:
+```sql
+-- Rendi opzionale un parametro
+UPDATE parametri SET obbligatorio = false WHERE id = 1;
+
+-- Rendi obbligatorio un parametro  
+UPDATE parametri SET obbligatorio = true WHERE id = 1;
+```
+
 ### Flusso creazione utente dall'admin
 
 1. Admin crea profilo nella tabella `utenti` (UUID generato, username, ruolo)

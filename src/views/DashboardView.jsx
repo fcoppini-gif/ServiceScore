@@ -7,14 +7,44 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Plus, Shield } from 'lucide-react';
+import { Trophy, Plus, Shield, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSwitcher }) {
   const navigate = useNavigate();
   const [leaderboard, setLeaderboard] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ServiceScore - Classifica', 14, 20);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Data: ${new Date().toLocaleDateString('it-IT')}`, 14, 28);
+    
+    const tableData = leaderboard.map((item, i) => [
+      `#${i + 1}`,
+      item.nome,
+      item.score.toFixed(1)
+    ]);
+    
+    doc.autoTable({
+      head: [['Pos.', 'Club', 'Punteggio']],
+      body: tableData,
+      startY: 35,
+      theme: 'grid',
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 10 },
+    });
+    
+    doc.save(`classifica_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -90,16 +120,35 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
 
         {/* LEADERBOARD */}
         <div className="space-y-6">
-          <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 ml-4">
-            <Trophy className="text-brand-yellow drop-shadow-sm" /> Ranking Live
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ml-4">
+            <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
+              <Trophy className="text-brand-yellow drop-shadow-sm" /> Ranking Live
+            </h3>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Cerca club..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/20 text-brand-dark dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-brand-blue"
+              />
+              <button
+                onClick={exportPDF}
+                className="px-4 py-2 bg-brand-blue dark:bg-brand-yellow text-white dark:text-brand-dark rounded-xl font-black text-sm flex items-center gap-2 cursor-pointer border-none hover:shadow-lg transition-all"
+              >
+                <Download size={16} /> PDF
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-4 font-bold">
             {leaderboard.length === 0 ? (
               <div className="text-center p-16 bg-white dark:bg-white/[0.08] rounded-[3rem] border border-dashed border-slate-300 dark:border-white/20 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs italic">
                 {isAdmin ? 'Nessun dato presente.' : 'Nessun dato per i tuoi club.'}
               </div>
             ) : (
-              leaderboard.map((item, i) => {
+              leaderboard
+                .filter((item) => item.nome.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map((item, i) => {
                 const maxScore = leaderboard[0]?.score || 1;
                 const progress = (item.score / maxScore) * 100;
                 return (

@@ -14,14 +14,16 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, Settings, Shield, BarChart3, ChevronDown } from 'lucide-react';
+import { LogOut, User, Settings, Shield, BarChart3, ChevronDown, Globe } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandLogo from './BrandLogo';
+import { useI18n } from '../lib/i18n';
 
 export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { toggleLang, t } = useI18n();
 
   // URL dell'avatar (se presente nel profilo)
   const avatarUrl = userProfile?.avatar_url || null;
@@ -79,9 +81,18 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
         </div>
       )}
 
-      {/* Area destra: tema + menu utente */}
+      {/* Area destra: tema + lingua + menu utente */}
       <div className="flex items-center gap-3">
         <ThemeSwitcher />
+        
+        {/* Language toggle */}
+        <button
+          onClick={toggleLang}
+          className="p-2 bg-slate-100 dark:bg-white/5 rounded-xl cursor-pointer border-none text-brand-blue dark:text-brand-yellow hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+          title={t('language')}
+        >
+          <Globe size={18} />
+        </button>
 
         {/* Menu utente dropdown */}
         <div className="relative">

@@ -12,6 +12,7 @@ import InsertWizardView from './views/InsertWizardView';
 import SuccessView from './views/SuccessView';
 import AccountView from './views/AccountView';
 import AdminView from './views/AdminView';
+import { I18nProvider } from './lib/i18n';
 
 function AppContent() {
   const { user, userProfile, isAdmin, userClubs, loading, refresh } = useAuth();
@@ -127,7 +128,9 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <I18nProvider>
+        <AppContent />
+      </I18nProvider>
     </BrowserRouter>
   );
 }

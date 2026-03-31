@@ -13,11 +13,14 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",
     "@tailwindcss/vite": "^4.2.2",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.1",
     "lucide-react": "^1.7.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
+    "recharts": "^2.15.3",
     "tailwindcss": "^4.2.2",
     "tailwindcss-animate": "^1.0.7"
   },
@@ -30,6 +33,15 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
-    "vite": "^8.0.1"
+    "vite": "^8.0.1",
+    "vite-plugin-pwa": "^0.21.2"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "qr": "node genera-qr.js",
+    "test": "echo \"No tests configured yet\""
   }
 }

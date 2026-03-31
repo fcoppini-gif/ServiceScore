@@ -185,12 +185,26 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
               >
                 Powered by 01Informatica
               </a>
-              <a 
-                href="/privacy.html"
-                className="text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
-              >
-                Privacy Policy
-              </a>
+              <div className="flex justify-center gap-3">
+                <a 
+                  href="/privacy.html"
+                  className="text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
+                >
+                  Privacy
+                </a>
+                <a 
+                  href="/termini.html"
+                  className="text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
+                >
+                  Termini
+                </a>
+                <a 
+                  href="/contratto.html"
+                  className="text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
+                >
+                  Contratto
+                </a>
+              </div>
             </div>
           </>
         ) : (

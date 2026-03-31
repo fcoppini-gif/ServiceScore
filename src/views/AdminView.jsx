@@ -8,11 +8,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Plus, Trash2, Edit3, Save, X, Trophy, Users, Building2, Layers, Settings, Activity,
-  Link2, Unlink, ArrowRight, Upload,
+  Link2, Unlink, ArrowRight, Upload, TrendingUp,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   const [editingService, setEditingService] = useState(null);
   const [editServiceName, setEditServiceName] = useState('');
   const [selectedServiceClub, setSelectedServiceClub] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
   const [clubServices, setClubServices] = useState([]);
 
   // Regole
@@ -50,9 +52,54 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   const [newUserClubs, setNewUserClubs] = useState([]);
   const [createdUserId, setCreatedUserId] = useState(null);
 
+  // Statistiche
+  const [statsData, setStatsData] = useState({ servicesByMonth: [], servicesByType: [], topClubs: [] });
+
   // =========================================================================
   // FETCH
   // =========================================================================
+  const fetchStats = async () => {
+    const { data: services } = await supabase
+      .from('service_inseriti')
+      .select('data_inserimento, punteggio_totale, id_club, club(nome), tipi_service(nome)')
+      .order('data_inserimento');
+    
+    if (!services || services.length === 0) return;
+    
+    const byMonth = {};
+    const byType = {};
+    
+    services.forEach((s) => {
+      const date = new Date(s.data_inserimento);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      byMonth[monthKey] = (byMonth[monthKey] || 0) + 1;
+      
+      const typeName = s.tipi_service?.nome || 'Altro';
+      byType[typeName] = (byType[typeName] || 0) + 1;
+    });
+    
+    const servicesByMonth = Object.entries(byMonth)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, count]) => ({ month, service: count }));
+    
+    const servicesByType = Object.entries(byType)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    
+    const clubScores = {};
+    services.forEach((s) => {
+      const clubName = s.club?.nome || 'Sconosciuto';
+      clubScores[clubName] = (clubScores[clubName] || 0) + (s.punteggio_totale || 0);
+    });
+    
+    const topClubs = Object.entries(clubScores)
+      .map(([name, score]) => ({ name, score: Math.round(score) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
+    
+    setStatsData({ servicesByMonth, servicesByType, topClubs });
+  };
+
   const fetchLeaderboard = async () => {
     const { data } = await supabase.from('service_inseriti').select(`punteggio_totale, id_club, club(nome, logo_url)`);
     if (data) {
@@ -83,11 +130,16 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
 
   const fetchClubServices = async (clubId) => {
     if (!clubId) { setClubServices([]); return; }
-    const { data } = await supabase
+    let query = supabase
       .from('service_inseriti')
       .select('*, tipi_service(nome), utenti(username)')
-      .eq('id_club', Number(clubId))
-      .order('data_inserimento', { ascending: false });
+      .eq('id_club', Number(clubId));
+    
+    if (selectedYear) {
+      query = query.gte('data_inserimento', `${selectedYear}-01-01`).lte('data_inserimento', `${selectedYear}-12-31`);
+    }
+    
+    const { data } = await query.order('data_inserimento', { ascending: false });
     setClubServices(data || []);
   };
 
@@ -116,6 +168,7 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   useEffect(() => {
     const run = async () => {
       if (section === 'classifica') await fetchLeaderboard();
+      if (section === 'statistiche') await fetchStats();
       if (section === 'club') await fetchClubs();
       if (section === 'service') { await fetchServices(); await fetchClubs(); }
       if (section === 'regole') await fetchRules();
@@ -266,6 +319,15 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   };
 
   // =========================================================================
+  // AZIONI PARAMETRI (Obbligatorio)
+  // =========================================================================
+  const toggleParamObligatorio = async (paramId, currentValue) => {
+    const newValue = currentValue !== false;
+    await supabase.from('parametri').update({ obbligatorio: !newValue }).eq('id', paramId);
+    fetchRules();
+  };
+
+  // =========================================================================
   // AZIONI UTENTI
   // =========================================================================
   const toggleUserClub = async (userId, clubId, isLinked) => {
@@ -323,6 +385,7 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   // =========================================================================
   const tabs = [
     { id: 'classifica', label: 'Classifica', icon: Trophy },
+    { id: 'statistiche', label: 'Statistiche', icon: TrendingUp },
     { id: 'club', label: 'Club', icon: Building2 },
     { id: 'service', label: 'Service', icon: Layers },
     { id: 'regole', label: 'Regole', icon: Settings },
@@ -369,6 +432,66 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
                 <div className="text-3xl font-black text-brand-blue dark:text-white">{item.score.toFixed(1)}</div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* STATISTICHE */}
+        {section === 'statistiche' && (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-black uppercase tracking-tight">Statistiche Dettagliate</h2>
+            
+            {/* Trend mensile */}
+            {statsData.servicesByMonth.length > 0 && (
+              <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20">
+                <h3 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-4">Trend Mensile Service</h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={statsData.servicesByMonth}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip />
+                    <Bar dataKey="service" fill="#0033A0" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Service per tipo */}
+              {statsData.servicesByType.length > 0 && (
+                <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-4">Service per Tipologia</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie data={statsData.servicesByType} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                        {statsData.servicesByType.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={['#0033A0', '#FF4D4D', '#FFC72C', '#28A745', '#6F42C1'][index % 5]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Top Club */}
+              {statsData.topClubs.length > 0 && (
+                <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-4">Top 10 Club</h3>
+                  <div className="space-y-3">
+                    {statsData.topClubs.slice(0, 5).map((club, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className={`font-black text-sm w-6 ${i === 0 ? 'text-brand-yellow' : 'text-slate-400'}`}>#{i + 1}</span>
+                        <div className="flex-1 h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-brand-blue" style={{ width: `${(club.score / statsData.topClubs[0].score) * 100}%` }} />
+                        </div>
+                        <span className="text-sm font-bold">{club.score}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -420,14 +543,22 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
         {/* SERVICE */}
         {section === 'service' && (
           <div className="space-y-6">
-            {/* Seleziona club */}
+            {/* Seleziona club + filtro anno */}
             <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20 shadow-sm space-y-4">
               <div className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow">Seleziona Club</div>
-              <div className="flex gap-3">
-                <select value={selectedServiceClub} onChange={(e) => { setSelectedServiceClub(e.target.value); fetchClubServices(e.target.value); }}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <select value={selectedServiceClub} onChange={(e) => { setSelectedServiceClub(e.target.value); setSelectedYear(''); fetchClubServices(e.target.value); }}
                   className="flex-1 py-3 px-5 rounded-xl text-sm font-bold cursor-pointer">
                   <option value="">Seleziona un club...</option>
                   {clubs.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                </select>
+                <select value={selectedYear} onChange={(e) => { setSelectedYear(e.target.value); fetchClubServices(selectedServiceClub); }}
+                  className="py-3 px-5 rounded-xl text-sm font-bold cursor-pointer bg-slate-100 dark:bg-black/50 text-brand-dark dark:text-white border border-slate-200 dark:border-white/20">
+                  <option value="">Tutti gli anni</option>
+                  <option value="2026">2026</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
                 </select>
                 {selectedServiceClub && (
                   <button onClick={() => navigate('/insert')}
@@ -506,8 +637,30 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
         {/* REGOLE */}
         {section === 'regole' && (
           <div className="space-y-6">
+            {/* Parametri con flag Obbligatorio */}
             <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20 shadow-sm space-y-4">
-              <div className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow">Nuova Regola</div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow">Parametri di Valutazione</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {allParams.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
+                    <span className="text-sm font-bold truncate pr-2">{p.nome}</span>
+                    <button
+                      onClick={() => toggleParamObligatorio(p.id, p.obbligatorio)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider cursor-pointer border-none transition-all ${
+                        p.obbligatorio !== false
+                          ? 'bg-brand-red text-white'
+                          : 'bg-slate-200 dark:bg-white/15 text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      {p.obbligatorio !== false ? 'Obbligatorio' : 'Opzionale'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Nuova Regola */}
+            <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20 shadow-sm space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <select value={newRule.id_tipo_service} onChange={(e) => setNewRule({ ...newRule, id_tipo_service: e.target.value })}
                   className="px-4 py-3 rounded-xl text-sm font-bold cursor-pointer">

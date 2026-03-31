@@ -52,27 +52,41 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
     () => allRules.filter((r) => r.id_tipo_service === Number(selectedService)),
     [selectedService, allRules]
   );
-  const maxPossibleScore = useMemo(
-    () => currentRules.reduce((sum, r) => sum + r.punti_max, 0),
-    [currentRules]
-  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const isParamMandatory = (paramId) => {
+    const param = parameters.find((p) => p.id === paramId);
+    return param?.obbligatorio !== false;
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const maxPossibleScore = useMemo(() => {
+    return currentRules.reduce((sum, r) => {
+      if (isParamMandatory(r.id_parametro)) return sum + r.punti_max;
+      return sum;
+    }, 0);
+  }, [currentRules, parameters]);
+
   const totalScore = useMemo(() => {
     let total = 0;
     currentRules.forEach((rule) => {
       const val = formValues[rule.id_parametro];
+      const isMandatory = isParamMandatory(rule.id_parametro);
+      if (isMandatory && (val === undefined || val === '')) return;
       if (val !== undefined && val !== '' && !formErrors[rule.id_parametro]) {
         total += (Number(val) / rule.range_max) * rule.punti_max;
       }
     });
     return total;
-  }, [formValues, currentRules, formErrors]);
+  }, [formValues, currentRules, formErrors, parameters]);
 
   const allFieldsFilled = useMemo(() => {
     if (currentRules.length === 0) return false;
-    return currentRules.every(
-      (rule) => formValues[rule.id_parametro] !== undefined && formValues[rule.id_parametro] !== ''
-    );
-  }, [currentRules, formValues]);
+    return currentRules.every((rule) => {
+      if (!isParamMandatory(rule.id_parametro)) return true;
+      return formValues[rule.id_parametro] !== undefined && formValues[rule.id_parametro] !== '';
+    });
+  }, [currentRules, formValues, parameters]);
 
   const handleInputChange = (paramId, value, rule) => {
     const numVal = value === '' ? '' : Number(value);
@@ -115,6 +129,13 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
       const { error: dErr } = await supabase.from('dettaglio_inserimenti').insert(details);
       if (dErr) throw dErr;
 
+      // Notifica email (richiede Edge Function Supabase configurata)
+      const clubName = clubs.find(c => c.id === Number(selectedClub))?.nome;
+      const serviceName = serviceTypes.find(s => s.id === Number(selectedService))?.nome;
+      
+      // Log per debug (in produzione, chiamare Edge Function)
+      console.log('Service inserito:', { club: clubName, service: serviceName, score: totalScore });
+
       navigate('/success');
     } catch (e) {
       toast.error(e.message);
@@ -149,10 +170,14 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
             {currentRules.map((rule) => {
               const val = formValues[rule.id_parametro] || 0;
               const perc = (val / rule.range_max) * 100;
+              const isMandatory = isParamMandatory(rule.id_parametro);
               return (
                 <div key={rule.id} className="space-y-2">
                   <div className="flex justify-between text-[9px] font-black uppercase opacity-60 px-1 text-brand-blue dark:text-slate-300">
-                    <span className="truncate max-w-[150px]">{parameters.find((p) => p.id === rule.id_parametro)?.nome}</span>
+                    <span className="truncate max-w-[150px] flex items-center gap-1">
+                      {parameters.find((p) => p.id === rule.id_parametro)?.nome}
+                      {!isMandatory && <span className="text-[8px] opacity-40">(Opz)</span>}
+                    </span>
                     <span>{Math.round(perc)}%</span>
                   </div>
                   <div className="h-1.5 bg-slate-300 dark:bg-white/15 rounded-full overflow-hidden shadow-inner">
@@ -222,11 +247,17 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
                   {currentRules.map((rule) => {
                     const p = parameters.find((x) => x.id === rule.id_parametro);
                     const err = formErrors[rule.id_parametro];
+                    const isMandatory = isParamMandatory(rule.id_parametro);
                     return (
                       <div key={rule.id} className="p-8 bg-white dark:bg-white/[0.08] rounded-[3rem] border border-slate-200 dark:border-white/20 hover:border-brand-blue/30 transition-all shadow-md group">
                         <div className="flex justify-between items-start mb-6">
                           <div className="flex flex-col">
-                            <span className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-300 tracking-widest mb-1">{p?.nome}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-300 tracking-widest mb-1">{p?.nome}</span>
+                              {!isMandatory && (
+                                <span className="text-[9px] font-black uppercase bg-slate-200 dark:bg-white/15 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full">Opzionale</span>
+                              )}
+                            </div>
                             <span className="text-[10px] font-black text-brand-red dark:text-brand-yellow uppercase">Limite: {rule.range_max}</span>
                           </div>
                           <Activity size={18} className="text-brand-blue/20 dark:text-white/20 group-hover:text-brand-yellow transition-colors" />
