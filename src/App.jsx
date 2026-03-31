@@ -30,6 +30,10 @@ function AppContent() {
     // Se arriva da "Apri nel Browser", salta il redirect
     if (fromInstall) {
       localStorage.setItem('hasVisited', 'true');
+      // Rimuovi il parametro dalla URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('from');
+      window.history.replaceState({}, '', url);
       return;
     }
     
