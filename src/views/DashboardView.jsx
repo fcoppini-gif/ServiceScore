@@ -140,20 +140,17 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
 
   if (showStats) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500">
+      <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 aurora-bg">
         <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
         
-        <div className="max-w-5xl mx-auto p-4 sm:p-12 space-y-8 pb-24 text-brand-dark dark:text-white animate-fade-in-up">
+        <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-12 space-y-8 pb-24 text-brand-dark dark:text-white animate-fade-in-up">
           <div className="flex items-center justify-between">
             <button
               onClick={() => setShowStats(false)}
-              className="cursor-pointer bg-brand-blue dark:bg-brand-yellow text-white dark:text-brand-dark font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg hover:scale-105 transition-all border-none"
+              className="cursor-pointer bg-brand-blue dark:bg-brand-yellow text-white dark:text-brand-dark font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg hover-lift transition-all border-none"
             >
               ← Classifica
             </button>
-          </div>
-          
-          <div className="text-center space-y-2">
           </div>
           
           <div className="text-center space-y-2">
@@ -244,13 +241,13 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 aurora-bg">
       <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
 
-      <div className="max-w-5xl mx-auto p-4 sm:p-12 space-y-10 pb-24 text-brand-dark dark:text-white">
+      <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-12 space-y-10 pb-24 text-brand-dark dark:text-white">
         {/* HERO */}
-        <div className="p-10 rounded-[3.5rem] bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/20 relative overflow-hidden shadow-xl group animate-fade-in-up">
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-blue/5 dark:bg-brand-blue/15 rounded-full blur-3xl group-hover:bg-brand-blue/20 transition-all duration-700 animate-pulse-glow"></div>
+        <div className="p-10 rounded-[3.5rem] bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/20 relative overflow-hidden shadow-xl group animate-fade-in-up hover-magnetic">
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-blue/5 dark:bg-brand-blue/15 rounded-full blur-3xl group-hover:bg-brand-blue/20 transition-all duration-700"></div>
           <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-brand-yellow/10 dark:bg-brand-yellow/5 rounded-full blur-3xl"></div>
           <div className="relative z-10 text-center sm:text-left">
             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red dark:text-brand-yellow mb-3 font-bold shimmer-text">
@@ -262,7 +259,7 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => navigate('/insert')}
-                className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-10 py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover:scale-105 hover-glow transition-all text-lg border-none glow-blue"
+                className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-10 py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover-lift transition-all text-lg border-none glow-blue"
               >
                 <Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1" />
                 NUOVA ANALISI
@@ -270,14 +267,14 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin/classifica')}
-                  className="w-full sm:w-auto cursor-pointer bg-brand-red text-white font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover:scale-105 hover-glow transition-all text-sm border-none glow-red"
+                  className="w-full sm:w-auto cursor-pointer bg-brand-red text-white font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover-lift transition-all text-sm border-none glow-red"
                 >
                   <Shield size={20} /> ADMIN
                 </button>
               )}
               <button
                 onClick={() => setShowStats(!showStats)}
-                className="w-full sm:w-auto cursor-pointer bg-brand-yellow text-brand-dark font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover:scale-105 hover-glow transition-all text-sm border-none glow-yellow"
+                className="w-full sm:w-auto cursor-pointer bg-brand-yellow text-brand-dark font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover-lift transition-all text-sm border-none glow-yellow"
               >
                 <BarChart3 size={20} /> {showStats ? 'CLASSIFICA' : 'STATISTICHE'}
               </button>
@@ -321,12 +318,11 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
                 return (
                   <div 
                     key={i} 
-                    className={`relative overflow-hidden p-6 rounded-[2.5rem] border transition-all shadow-sm group animate-slide-up ${
+                    className={`relative overflow-hidden p-6 rounded-[2.5rem] border transition-all shadow-sm group stagger-item hover-magnetic ${
                       i === 0 
                         ? 'bg-gradient-to-r from-brand-yellow/20 to-transparent dark:from-brand-yellow/10 border-brand-yellow/50 shadow-[0_0_30px_rgba(255,199,44,0.3)]' 
-                        : 'bg-white dark:bg-white/[0.08] border-slate-200 dark:border-white/20 hover:border-brand-blue/40'
+                        : 'bg-white dark:bg-white/[0.08] border-slate-200 dark:border-white/20'
                     }`}
-                    style={{ animationDelay: `${i * 80}ms` }}
                   >
                     {/* Progress bar background */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-200 dark:bg-white/10">

@@ -23,6 +23,11 @@
   --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-bounce-subtle: bounce-subtle 1s ease-in-out infinite;
+  --animate-aurora: aurora 12s ease-in-out infinite;
+  --animate-reveal: reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  --animate-stagger-up: stagger-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  --animate-border-magnetic: border-magnetic 3s ease-in-out infinite;
+  --animate-text-glow: text-glow 3s ease-in-out infinite;
   
   @keyframes gradient {
     0% { background-position: 0% 50%; }
@@ -107,6 +112,67 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
   }
+  
+  @keyframes aurora {
+    0%, 100% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+      opacity: 0.6;
+    }
+    25% {
+      transform: translate(30px, -40px) scale(1.1) rotate(5deg);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translate(-20px, 20px) scale(0.95) rotate(-3deg);
+      opacity: 0.7;
+    }
+    75% {
+      transform: translate(40px, 10px) scale(1.05) rotate(2deg);
+      opacity: 0.9;
+    }
+  }
+  
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+  
+  @keyframes stagger-up {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes border-magnetic {
+    0%, 100% {
+      border-color: rgba(0, 51, 160, 0.15);
+    }
+    50% {
+      border-color: rgba(255, 199, 44, 0.3);
+    }
+  }
+  
+  @keyframes text-glow {
+    0%, 100% {
+      text-shadow: 0 0 10px rgba(0, 51, 160, 0);
+    }
+    50% {
+      text-shadow: 0 0 20px rgba(0, 51, 160, 0.3), 0 0 40px rgba(255, 199, 44, 0.2);
+    }
+  }
 }
 
 /* ===== EFFETTI FUTURISTICI ===== */
@@ -172,6 +238,147 @@
 .dark .glass {
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== ANIMAZIONI ELEGANTI ===== */
+
+/* Aurora: glow morbido che si muove lentamente */
+.aurora-bg {
+  position: relative;
+}
+.aurora-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(0, 51, 160, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(255, 199, 44, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(227, 24, 55, 0.03) 0%, transparent 50%);
+  animation: aurora 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.dark .aurora-bg::before {
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(0, 51, 160, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(255, 199, 44, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(227, 24, 55, 0.04) 0%, transparent 50%);
+}
+
+/* Reveal: elementi appaiono con blur fade-in */
+.reveal-item {
+  opacity: 0;
+  animation: reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.reveal-item:nth-child(1) { animation-delay: 0ms; }
+.reveal-item:nth-child(2) { animation-delay: 80ms; }
+.reveal-item:nth-child(3) { animation-delay: 160ms; }
+.reveal-item:nth-child(4) { animation-delay: 240ms; }
+.reveal-item:nth-child(5) { animation-delay: 320ms; }
+.reveal-item:nth-child(6) { animation-delay: 400ms; }
+.reveal-item:nth-child(7) { animation-delay: 480ms; }
+.reveal-item:nth-child(8) { animation-delay: 560ms; }
+.reveal-item:nth-child(9) { animation-delay: 640ms; }
+.reveal-item:nth-child(10) { animation-delay: 720ms; }
+
+/* Staggered list items */
+.stagger-item {
+  opacity: 0;
+  animation: stagger-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 60ms; }
+.stagger-item:nth-child(3) { animation-delay: 120ms; }
+.stagger-item:nth-child(4) { animation-delay: 180ms; }
+.stagger-item:nth-child(5) { animation-delay: 240ms; }
+.stagger-item:nth-child(6) { animation-delay: 300ms; }
+
+/* Hover magnetico: glow sui bordi */
+.hover-magnetic {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-color: rgba(0, 51, 160, 0.1);
+}
+.hover-magnetic:hover {
+  border-color: rgba(255, 199, 44, 0.3);
+  box-shadow: 
+    0 0 0 1px rgba(255, 199, 44, 0.1),
+    0 8px 32px rgba(0, 51, 160, 0.08),
+    0 0 60px rgba(255, 199, 44, 0.05);
+}
+.dark .hover-magnetic:hover {
+  border-color: rgba(255, 199, 44, 0.2);
+  box-shadow: 
+    0 0 0 1px rgba(255, 199, 44, 0.05),
+    0 8px 32px rgba(0, 51, 160, 0.15),
+    0 0 60px rgba(255, 199, 44, 0.03);
+}
+
+/* Testo con glow pulsante */
+.text-glow-pulse {
+  animation: text-glow 3s ease-in-out infinite;
+}
+
+/* Bordo shimmer elegante */
+.border-shimmer {
+  position: relative;
+}
+.border-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid transparent;
+  background: linear-gradient(90deg, #0033A000, #0033A0, #FFC72C, #E31837, #E3183700) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: shimmer 4s linear infinite;
+  pointer-events: none;
+}
+
+/* Hover lift: solleva l'elemento */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+.dark .hover-lift:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Card inner glow on hover */
+.inner-glow {
+  position: relative;
+  overflow: hidden;
+}
+.inner-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(0, 51, 160, 0.06) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.inner-glow:hover::before {
+  opacity: 1;
+}
+
+/* Pulse soft per indicatori */
+.pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
 :root {

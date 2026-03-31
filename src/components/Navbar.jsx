@@ -37,47 +37,20 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
 
       {/* Link admin (visibili solo se admin) */}
       {isAdmin && (
-        <div className="hidden md:flex items-center gap-2 mx-4">
-          <button
-            onClick={() => navigate('/admin/classifica')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
-              location.pathname.includes('/admin/classifica')
-                ? 'bg-brand-blue text-white'
-                : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10'
-            }`}
-          >
-            Classifica
-          </button>
-          <button
-            onClick={() => navigate('/admin/club')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
-              location.pathname.includes('/admin/club')
-                ? 'bg-brand-blue text-white'
-                : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10'
-            }`}
-          >
-            Club
-          </button>
-          <button
-            onClick={() => navigate('/admin/service')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
-              location.pathname.includes('/admin/service')
-                ? 'bg-brand-blue text-white'
-                : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10'
-            }`}
-          >
-            Service
-          </button>
-          <button
-            onClick={() => navigate('/admin/utenti')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
-              location.pathname.includes('/admin/utenti')
-                ? 'bg-brand-blue text-white'
-                : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10'
-            }`}
-          >
-            Utenti
-          </button>
+        <div className="hidden md:flex items-center gap-1 mx-4">
+          {['classifica', 'club', 'service', 'utenti'].map((path) => (
+            <button
+              key={path}
+              onClick={() => navigate(`/admin/${path}`)}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
+                location.pathname.includes(`/admin/${path}`)
+                  ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/25'
+                  : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10 hover:shadow-md'
+              }`}
+            >
+              {path.charAt(0).toUpperCase() + path.slice(1)}
+            </button>
+          ))}
         </div>
       )}
 

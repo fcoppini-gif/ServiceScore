@@ -70,17 +70,20 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
         resolvedTheme === 'dark' ? 'bg-[#0B132B]' : 'bg-slate-100'
       }`}
     >
-      {/* Sfondi animati futuristici */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-brand-blue/10 rounded-full blur-[100px] animate-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand-yellow/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+      {/* Sfondo aurora elegante */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-brand-blue/[0.03] rounded-full blur-[120px] animate-aurora"></div>
+        <div className="absolute bottom-[20%] right-[10%] w-[400px] h-[400px] bg-brand-yellow/[0.04] rounded-full blur-[100px] animate-aurora" style={{ animationDelay: '4s', animationDuration: '14s' }}></div>
+        <div className="absolute top-[50%] left-[60%] w-[300px] h-[300px] bg-brand-red/[0.03] rounded-full blur-[80px] animate-aurora" style={{ animationDelay: '8s', animationDuration: '18s' }}></div>
+      </div>
       
       {/* Toggle tema in alto */}
       <div className="mb-8 z-50">
         <ThemeSwitcher />
       </div>
       {/* Card principale con bordo gradiente brand */}
-      <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden animate-scale-in gradient-border">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C] animate-shimmer bg-[length:200%_100%]"></div>
+      <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden animate-scale-in">
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C] bg-[length:200%_100%] animate-shimmer"></div>
         {!confirmationSent ? (
           <>
             <BrandLogo className="h-14 sm:h-20 mb-10" />
@@ -147,7 +150,7 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full cursor-pointer bg-brand-blue hover:bg-blue-800 dark:bg-gradient-to-r dark:from-[#0033A0] dark:via-[#E31837] dark:to-[#FFC72C] text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl active:scale-95 transition-all mt-4 flex justify-center items-center gap-2 border-none"
+                className="w-full cursor-pointer bg-brand-blue hover:bg-blue-800 dark:bg-gradient-to-r dark:from-[#0033A0] dark:via-[#E31837] dark:to-[#FFC72C] text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl active:scale-95 hover-lift transition-all mt-4 flex justify-center items-center gap-2 border-none"
               >
                 {isSubmitting ? (
                   <Activity className="animate-spin" />
@@ -165,7 +168,7 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
                   setAuthMode(authMode === 'login' ? 'signup' : 'login');
                   setError('');
                 }}
-                className="group flex items-center justify-center gap-3 w-full text-[12px] font-black text-brand-blue dark:text-[#FFC72C] uppercase tracking-widest hover:scale-105 transition-all cursor-pointer p-4 rounded-2xl bg-brand-blue/5 dark:bg-white/5 border border-brand-blue/10 dark:border-[#FFC72C]/20 shadow-md"
+                className="group flex items-center justify-center gap-3 w-full text-[12px] font-black text-brand-blue dark:text-[#FFC72C] uppercase tracking-widest hover-lift transition-all cursor-pointer p-4 rounded-2xl bg-brand-blue/5 dark:bg-white/5 border border-brand-blue/10 dark:border-[#FFC72C]/20 shadow-md"
               >
                 {authMode === 'login' ? (
                   <>
