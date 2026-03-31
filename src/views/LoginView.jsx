@@ -175,15 +175,21 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
               </button>
             </div>
 
-            {/* Link al sito */}
-            <div className="mt-6 text-center">
+            {/* Link al sito e privacy */}
+            <div className="mt-6 text-center space-y-2">
               <a 
                 href="https://www.info01.it/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
+                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
               >
                 Powered by 01Informatica
+              </a>
+              <a 
+                href="/privacy.html"
+                className="text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
+              >
+                Privacy Policy
               </a>
             </div>
           </>
