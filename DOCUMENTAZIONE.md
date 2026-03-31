@@ -492,3 +492,29 @@ Ogni regola definisce: per un certo tipo service, un certo parametro ha range mi
 - **Credenziali**: variabili d'ambiente, non nel codice sorgente
 - **HTTPS**: certificato SSL gratuito fornito da Vercel
 - **Storage**: bucket `avatars` public con policies per upload/lettura
+
+---
+
+## 18. Ultimi Aggiornamenti (Marzo 2026)
+
+### Statistiche per Tutti gli Utenti
+Le statistiche sono ora accessibili anche ai referenti (non solo admin), con dati filtrati solo per i club associati.
+
+### Animazioni Eleganti
+- **Aurora Background**: glow morbido e sottile che si muove lentamente sullo sfondo
+- **Stagger Items**: elementi della classifica appaiono uno dopo l'altro
+- **Hover Lift**: pulsanti e card si sollevano delicatamente all'hover
+- **Shimmer Text**: testo con gradiente animato
+- **Reveal Effect**: elementi appaiono con blur fade-in
+
+### Miglioramenti Grafici
+- **Login**: card più leggera, input eleganti con focus sottile, submit button con gradient
+- **Dashboard**: hero section con gradient elegante, progress bar con gradienti
+- **Navbar**: più compatta e raffinata
+- **Admin**: tabs più eleganti con shadow brand-colored
+- **Footer**: più sottile e minimal
+
+### Fix Tecnici
+- **PWA**: service worker inline per compatibilità con Rolldown (Vite 8)
+- **Overflow**: fix scrollbar orizzontale con `overflow-x: hidden` su html/body
+- **Indipendenza Statistiche**: stato delle statistiche gestito internamente in DashboardView

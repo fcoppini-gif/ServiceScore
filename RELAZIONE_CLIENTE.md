@@ -50,6 +50,8 @@ I Lions Club gestiscono manualmente centinaia di service ogni anno, con un dispe
 
 | Funzionalità | Descrizione |
 |--------------|-------------|
+| 📊 **Statistiche per Tutti** | Le statistiche sono ora accessibili anche ai referenti, con dati solo dei propri club |
+| 🎨 **Animazioni Eleganti** | Aurora background, stagger items, hover lift, shimmer text - tutto molto morbido |
 | 📊 **Statistiche Ultra** | Dashboard spettacolare con KPI, grafici gradient, top club con medaglie |
 | 🔍 **Cerca nella Classifica** | Filtro di ricerca in tempo reale per trovare rapidamente un club |
 | 📅 **Filtro per Anno** | Possibilità di filtrare i service inseriti per anno specifico |
@@ -60,6 +62,7 @@ I Lions Club gestiscono manualmente centinaia di service ogni anno, con un dispe
 | ⚙️ **Parametri Opzionali** | Possibilità di impostare parametri come obbligatori o opzionali |
 | 🎬 **Animazioni** | Entrate fluide e moderne in ogni pagina |
 | ⏳ **Schermata Caricamento** | Logo rotante con aloneo durante il caricamento |
+| 📱 **PWA Ottimizzata** | Service worker inline per massima compatibilità |
 
 ---
 

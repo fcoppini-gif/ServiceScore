@@ -209,9 +209,10 @@ punti = (valore_inserito / range_max) * punti_max
 
 ### 7. PWA Offline
 - **Configurazione**: `vite.config.js` con `vite-plugin-pwa`
-- **Service Worker**: `public/sw.js`
+- **Service Worker**: registrazione inline nell'HTML (no file esterno registerSW.js)
 - **Offline Page**: `public/offline.html`
 - **Cache**: Workbox con precaching
+- **Note**: `injectRegister: 'inline'` per compatibilità con Rolldown (Vite 8)
 
 ### 8. Parametri Opzionali
 - **Frontend**: InsertWizardView gestisce logica
@@ -231,6 +232,25 @@ punti = (valore_inserito / range_max) * punti_max
 - **KPI Cards**: Service totali, tipologie, punteggio max, club attivi
 - **Grafici**: Bar chart con gradienti, Pie chart ad anello, Top Club con medaglie
 - **Effetti**: Sfumature, hover scale, animazioni pulse
+- **Accesso Referenti**: Ora anche i referenti possono vedere statistiche (filtrate per club associati)
+
+### 12. Animazioni CSS Eleganti
+- **Aurora Background**: glow morbido con `@keyframes aurora` (12s cycle), movimento lento
+- **Stagger Items**: elementi appaiono con delay crescente (60ms per item)
+- **Hover Lift**: translateY(-4px) con transition cubic-bezier
+- **Hover Magnetic**: bordi con glow sottile all'hover
+- **Shimmer Text**: gradiente animato per testi
+- **Reveal Effect**: opacity + translateY + blur per apparizioni eleganti
+- **Border Shimmer**: contorno luminoso animato
+- **Pulse Soft**: opacity 0.6→1 per indicatori sottili
+- **Aurora BG**: classi CSS per sfondi con gradienti radiali mobili
+
+### 13. Miglioramenti UI
+- **Login**: card più leggera (backdrop-blur ridotto), input con focus sottile (cambio bordo, no ring)
+- **Dashboard**: hero con gradient elegante, pulsanti con shadow brand-colored
+- **Navbar**: più compatta, logo leggermente più piccolo
+- **Admin**: tabs con shadow brand, layout più compatto
+- **Footer**: più sottile e minimal, testo più piccolo
 
 ---
 
