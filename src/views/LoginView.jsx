@@ -70,13 +70,17 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
         resolvedTheme === 'dark' ? 'bg-[#0B132B]' : 'bg-slate-100'
       }`}
     >
+      {/* Sfondi animati futuristici */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-brand-blue/10 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand-yellow/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+      
       {/* Toggle tema in alto */}
       <div className="mb-8 z-50">
         <ThemeSwitcher />
       </div>
       {/* Card principale con bordo gradiente brand */}
-      <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden animate-scale-in">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C]"></div>
+      <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden animate-scale-in gradient-border">
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C] animate-shimmer bg-[length:200%_100%]"></div>
         {!confirmationSent ? (
           <>
             <BrandLogo className="h-14 sm:h-20 mb-10" />

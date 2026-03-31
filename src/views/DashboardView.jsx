@@ -90,9 +90,10 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
       <div className="max-w-5xl mx-auto p-4 sm:p-12 space-y-10 pb-24 text-brand-dark dark:text-white">
         {/* HERO */}
         <div className="p-10 rounded-[3.5rem] bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/20 relative overflow-hidden shadow-xl group animate-fade-in-up">
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-blue/5 dark:bg-brand-blue/15 rounded-full blur-3xl group-hover:bg-brand-blue/20 transition-all duration-700"></div>
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-blue/5 dark:bg-brand-blue/15 rounded-full blur-3xl group-hover:bg-brand-blue/20 transition-all duration-700 animate-pulse-glow"></div>
+          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-brand-yellow/10 dark:bg-brand-yellow/5 rounded-full blur-3xl"></div>
           <div className="relative z-10 text-center sm:text-left">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red dark:text-brand-yellow mb-3 font-bold">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red dark:text-brand-yellow mb-3 font-bold shimmer-text">
               Lions District Network
             </h2>
             <h1 className="text-4xl lg:text-5xl font-black tracking-tighter mb-10 uppercase">
@@ -101,7 +102,7 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => navigate('/insert')}
-                className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-10 py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover:scale-105 transition-all text-lg border-none"
+                className="w-full sm:w-auto cursor-pointer bg-brand-blue dark:bg-white text-white dark:text-brand-dark font-black px-10 py-5 rounded-3xl flex items-center justify-center gap-4 shadow-2xl hover:scale-105 hover-glow transition-all text-lg border-none glow-blue"
               >
                 <Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1" />
                 NUOVA ANALISI
@@ -109,7 +110,7 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin/classifica')}
-                  className="w-full sm:w-auto cursor-pointer bg-brand-red text-white font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover:scale-105 transition-all text-sm border-none"
+                  className="w-full sm:w-auto cursor-pointer bg-brand-red text-white font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover:scale-105 hover-glow transition-all text-sm border-none glow-red"
                 >
                   <Shield size={20} /> ADMIN
                 </button>

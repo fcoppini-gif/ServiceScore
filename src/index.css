@@ -19,6 +19,10 @@
   --animate-scale-in: scale-in 0.3s ease-out;
   --animate-slide-in-left: slide-in-left 0.4s ease-out;
   --animate-slide-in-right: slide-in-right 0.4s ease-out;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-bounce-subtle: bounce-subtle 1s ease-in-out infinite;
   
   @keyframes gradient {
     0% { background-position: 0% 50%; }
@@ -79,6 +83,96 @@
       transform: translateX(0);
     }
   }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(255, 199, 44, 0.3);
+    }
+    50% { 
+      box-shadow: 0 0 40px rgba(255, 199, 44, 0.6), 0 0 60px rgba(0, 51, 160, 0.3);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+}
+
+/* ===== EFFETTI FUTURISTICI ===== */
+
+/* Glow effect per elementi */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(0, 51, 160, 0.4), 0 0 40px rgba(0, 51, 160, 0.2);
+}
+
+.glow-yellow {
+  box-shadow: 0 0 20px rgba(255, 199, 44, 0.4), 0 0 40px rgba(255, 199, 44, 0.2);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(227, 24, 55, 0.4), 0 0 40px rgba(227, 24, 55, 0.2);
+}
+
+/* Gradiente shimmer per testi/shapes */
+.shimmer-text {
+  background: linear-gradient(90deg, #0033A0, #E31837, #FFC72C, #0033A0);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Animazione hover futuristica */
+.hover-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(0, 51, 160, 0.3);
+}
+
+/* Card con bordo animato */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(90deg, #0033A0, #E31837, #FFC72C, #0033A0);
+  background-size: 300% 100%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: shimmer 4s linear infinite;
+  opacity: 0.5;
+}
+
+/* Effetto vetro (glassmorphism) */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 }
 
 :root {
