@@ -102,7 +102,7 @@ export default function AccountView({ isAdmin, userProfile, ThemeSwitcher, toast
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 animate-fade-in-up">
       <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
 
       <div className="max-w-2xl mx-auto p-6 sm:p-12 space-y-8 text-brand-dark dark:text-white">

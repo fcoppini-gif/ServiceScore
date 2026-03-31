@@ -16,7 +16,7 @@ export default function SuccessView({ resolvedTheme }) {
 
   return (
     <div
-      className={`min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 text-center transition-all duration-500 relative overflow-hidden ${
+      className={`min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 text-center transition-all duration-500 relative overflow-hidden animate-scale-in ${
         resolvedTheme === 'dark' ? 'bg-[#0B132B]' : 'bg-slate-100'
       }`}
     >

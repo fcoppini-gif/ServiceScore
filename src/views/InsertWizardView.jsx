@@ -145,7 +145,7 @@ export default function InsertWizardView({ isAdmin, userClubs, userProfile, Them
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 overflow-x-hidden animate-fade-in-up">
       <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
 
       {/* Step indicator */}

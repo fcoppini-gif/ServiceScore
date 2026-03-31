@@ -75,7 +75,7 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
         <ThemeSwitcher />
       </div>
       {/* Card principale con bordo gradiente brand */}
-      <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
+      <div className="z-10 w-full max-w-md bg-white dark:bg-white/5 backdrop-blur-3xl border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden animate-scale-in">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#0033A0] via-[#E31837] to-[#FFC72C]"></div>
         {!confirmationSent ? (
           <>
