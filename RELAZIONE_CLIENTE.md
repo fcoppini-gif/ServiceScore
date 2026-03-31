@@ -50,14 +50,16 @@ I Lions Club gestiscono manualmente centinaia di service ogni anno, con un dispe
 
 | Funzionalità | Descrizione |
 |--------------|-------------|
-| 📊 **Statistiche Avanzate** | Grafici interattivi con trend mensile, distribuzione service per tipologia e top 10 club |
+| 📊 **Statistiche Ultra** | Dashboard spettacolare con KPI, grafici gradient, top club con medaglie |
 | 🔍 **Cerca nella Classifica** | Filtro di ricerca in tempo reale per trovare rapidamente un club |
 | 📅 **Filtro per Anno** | Possibilità di filtrare i service inseriti per anno specifico |
 | 📄 **Esporta PDF** | Download della classifica completa in formato PDF |
 | 💾 **Backup Dati** | Esportazione dei propri service in file JSON |
-| 🌐 **Multi-lingua** | Toggle IT/EN per cambiare lingua dell'interfaccia |
+| 🌐 **Multi-lingua** | Toggle IT/EN per cambiare lingua dell'interfaccia (pronto per futuro) |
 | 📱 **Funzionamento Offline** | L'app funziona anche senza connessione internet (PWA avanzato) |
 | ⚙️ **Parametri Opzionali** | Possibilità di impostare parametri come obbligatori o opzionali |
+| 🎬 **Animazioni** | Entrate fluide e moderne in ogni pagina |
+| ⏳ **Schermata Caricamento** | Logo rotante con aloneo durante il caricamento |
 
 ---
 

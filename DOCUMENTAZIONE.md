@@ -362,8 +362,14 @@ UPDATE parametri SET obbligatorio = true WHERE id = 1;
 | File | Descrizione |
 |---|---|
 | `public/installazione.html` | Landing page per installare l'app su smartphone (con logo) |
+| `public/privacy.html` | Privacy Policy |
+| `public/termini.html` | Termini e Condizioni |
+| `public/contratto.html` | Contratto di Servizio |
+| `public/offline.html` | Pagina visualizzata offline |
+| `public/sw.js` | Service Worker per PWA |
 | `genera-qr.js` | Genera QR code con colori brand (`npm run qr`) |
 | `vercel.json` | Configurazione rewrite SPA per Vercel |
+| `.npmrc` | Configurazione legacy-peer-deps per Vercel |
 
 ---
 

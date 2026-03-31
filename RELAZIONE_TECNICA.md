@@ -217,6 +217,21 @@ punti = (valore_inserito / range_max) * punti_max
 - **Frontend**: InsertWizardView gestisce logica
 - **Admin**: AdminView permite toggle obbligatorio/opzionale
 
+### 9. Schermata Caricamento
+- **File**: `src/components/LoadingScreen.jsx`
+- **Animazione**: Logo rotante con aloneo pulsante
+- **Usato**: Durante il loading iniziale dell'app
+
+### 10. Animazioni di Entrata
+- **File**: `src/index.css` - Nuove keyframes (`fade-in-up`, `scale-in`, etc.)
+- **Applicate a**: Login, Dashboard, InsertWizard, Success, Account, Statistiche
+
+### 11. Statistiche Ultra Moderne
+- **Sezione**: Admin → Statistiche
+- **KPI Cards**: Service totali, tipologie, punteggio max, club attivi
+- **Grafici**: Bar chart con gradienti, Pie chart ad anello, Top Club con medaglie
+- **Effetti**: Sfumature, hover scale, animazioni pulse
+
 ---
 
 ## API e Query
