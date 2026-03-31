@@ -123,7 +123,7 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
       
       const clubScores = {};
       filteredServices.forEach((s) => {
-        const clubName = s.club?.nome || 'Sconosciuto';
+        const clubName = s.club?.nome || 'Altro';
         clubScores[clubName] = (clubScores[clubName] || 0) + (s.punteggio_totale || 0);
       });
       
@@ -151,6 +151,9 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
             >
               ← Classifica
             </button>
+          </div>
+          
+          <div className="text-center space-y-2">
           </div>
           
           <div className="text-center space-y-2">
@@ -188,46 +191,52 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
                   <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                   <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip />
-                  <Bar dataKey="service" fill="#0033A0" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="service" fill="#0033A0" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {statsData.servicesByType.length > 0 && (
-              <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
-                <h3 className="text-lg font-black uppercase tracking-widest text-brand-red dark:text-brand-yellow mb-6">Tipologie</h3>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie data={statsData.servicesByType} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={70}>
-                      {statsData.servicesByType.map((_, i) => (
-                        <Cell key={i} fill={['#0033A0', '#E31837', '#FFC72C', '#28A745', '#6F42C1'][i % 5]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-            
-            {statsData.topClubs.length > 0 && (
-              <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
-                <h3 className="text-lg font-black uppercase tracking-widest text-brand-yellow mb-6">Top Club</h3>
-                <div className="space-y-3">
-                  {statsData.topClubs.slice(0, 4).map((club, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className={`font-black text-sm w-6 ${i === 0 ? 'text-brand-yellow' : 'text-slate-400'}`}>#{i + 1}</span>
-                      <div className="flex-1 h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-brand-blue" style={{ width: `${(club.score / statsData.topClubs[0].score) * 100}%` }} />
-                      </div>
-                      <span className="text-sm font-bold">{club.score}</span>
+          {statsData.servicesByType.length > 0 && (
+            <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
+              <h3 className="text-lg font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-6">Tipologie Service</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={statsData.servicesByType.slice(0, 5)}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {statsData.servicesByType.slice(0, 5).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#0033A0', '#E31837', '#FFC72C', '#8B5CF6', '#10B981'][index % 5]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          
+          {statsData.topClubs.length > 0 && (
+            <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
+              <h3 className="text-lg font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-6">Top Club</h3>
+              <div className="space-y-4">
+                {statsData.topClubs.slice(0, 4).map((club, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <span className={`font-black text-sm w-6 ${i === 0 ? 'text-brand-yellow' : 'text-slate-400'}`}>#{i + 1}</span>
+                    <div className="flex-1 h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-brand-blue" style={{ width: `${(club.score / statsData.topClubs[0].score) * 100}%` }} />
                     </div>
-                  ))}
-                </div>
+                    <span className="text-sm font-bold">{club.score}</span>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         <Footer />
       </div>
@@ -235,8 +244,11 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-12 space-y-10 pb-24 text-brand-dark dark:text-white">
-      {/* HERO */}
+    <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500">
+      <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
+
+      <div className="max-w-5xl mx-auto p-4 sm:p-12 space-y-10 pb-24 text-brand-dark dark:text-white">
+        {/* HERO */}
         <div className="p-10 rounded-[3.5rem] bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/20 relative overflow-hidden shadow-xl group animate-fade-in-up">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-blue/5 dark:bg-brand-blue/15 rounded-full blur-3xl group-hover:bg-brand-blue/20 transition-all duration-700 animate-pulse-glow"></div>
           <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-brand-yellow/10 dark:bg-brand-yellow/5 rounded-full blur-3xl"></div>
@@ -255,12 +267,6 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
                 <Plus size={24} className="bg-white dark:bg-brand-dark text-brand-blue dark:text-white rounded-xl p-1" />
                 NUOVA ANALISI
               </button>
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className="w-full sm:w-auto cursor-pointer bg-brand-yellow text-brand-dark font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover:scale-105 hover-glow transition-all text-sm border-none glow-yellow"
-              >
-                <BarChart3 size={20} /> {showStats ? 'CLASSIFICA' : 'STATISTICHE'}
-              </button>
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin/classifica')}
@@ -269,6 +275,12 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
                   <Shield size={20} /> ADMIN
                 </button>
               )}
+              <button
+                onClick={() => setShowStats(!showStats)}
+                className="w-full sm:w-auto cursor-pointer bg-brand-yellow text-brand-dark font-black px-8 py-5 rounded-3xl flex items-center justify-center gap-3 shadow-xl hover:scale-105 hover-glow transition-all text-sm border-none glow-yellow"
+              >
+                <BarChart3 size={20} /> {showStats ? 'CLASSIFICA' : 'STATISTICHE'}
+              </button>
             </div>
           </div>
         </div>
