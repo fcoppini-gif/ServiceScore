@@ -437,61 +437,181 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
 
         {/* STATISTICHE */}
         {section === 'statistiche' && (
-          <div className="space-y-8">
-            <h2 className="text-2xl font-black uppercase tracking-tight">Statistiche Dettagliate</h2>
-            
-            {/* Trend mensile */}
+          <div className="space-y-8 animate-fade-in-up">
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow bg-clip-text text-transparent">Statistiche Dettagliate</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest">Dashboard Interattiva</p>
+            </div>
+
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-brand-blue to-brand-blue/80 p-6 rounded-[2rem] text-white shadow-xl transform hover:scale-105 transition-all">
+                <div className="text-4xl font-black">{statsData.servicesByMonth.reduce((a, b) => a + b.service, 0)}</div>
+                <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Service Totali</div>
+              </div>
+              <div className="bg-gradient-to-br from-brand-red to-brand-red/80 p-6 rounded-[2rem] text-white shadow-xl transform hover:scale-105 transition-all">
+                <div className="text-4xl font-black">{statsData.servicesByType.length}</div>
+                <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Tipologie</div>
+              </div>
+              <div className="bg-gradient-to-br from-brand-yellow to-amber-500 p-6 rounded-[2rem] text-brand-dark shadow-xl transform hover:scale-105 transition-all">
+                <div className="text-4xl font-black">{statsData.topClubs[0]?.score || 0}</div>
+                <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Punteggio Max</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-600 to-purple-600/80 p-6 rounded-[2rem] text-white shadow-xl transform hover:scale-105 transition-all">
+                <div className="text-4xl font-black">{statsData.topClubs.length}</div>
+                <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Club Attivi</div>
+              </div>
+            </div>
+
+            {/* Trend mensile con sfondo moderno */}
             {statsData.servicesByMonth.length > 0 && (
-              <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20">
-                <h3 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-4">Trend Mensile Service</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={statsData.servicesByMonth}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Bar dataKey="service" fill="#0033A0" radius={[4, 4, 0, 0]} />
+              <div className="bg-gradient-to-br from-white to-slate-50 dark:from-white/[0.08] dark:to-white/[0.02] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-blue/5 rounded-full blur-3xl"></div>
+                <h3 className="text-lg font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-6 flex items-center gap-2">
+                  <span className="w-3 h-3 bg-brand-blue rounded-full animate-pulse"></span>
+                  Trend Mensile Service
+                </h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={statsData.servicesByMonth} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0033A0" />
+                        <stop offset="100%" stopColor="#FFC72C" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,51,160,0.1)" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 'bold' }} axisLine={{ stroke: '#e2e8f0' }} />
+                    <YAxis tick={{ fontSize: 11, fill: '#64748b', fontWeight: 'bold' }} axisLine={{ stroke: '#e2e8f0' }} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
+                      cursor={{ fill: 'rgba(0,51,160,0.05)' }}
+                    />
+                    <Bar dataKey="service" fill="url(#barGradient)" radius={[8, 8, 0, 0]} animationDuration={1500} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Service per tipo */}
+              {/* Service per tipo con grafico ad anello moderno */}
               {statsData.servicesByType.length > 0 && (
-                <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-4">Service per Tipologia</h3>
-                  <ResponsiveContainer width="100%" height={250}>
+                <div className="bg-gradient-to-br from-white to-slate-50 dark:from-white/[0.08] dark:to-white/[0.02] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl relative overflow-hidden">
+                  <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-brand-red/10 rounded-full blur-3xl"></div>
+                  <h3 className="text-lg font-black uppercase tracking-widest text-brand-red dark:text-brand-yellow mb-6 flex items-center gap-2">
+                    <span className="w-3 h-3 bg-brand-red rounded-full animate-pulse"></span>
+                    Distribuzione Tipologie
+                  </h3>
+                  <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
-                      <Pie data={statsData.servicesByType} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                        {statsData.servicesByType.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={['#0033A0', '#FF4D4D', '#FFC72C', '#28A745', '#6F42C1'][index % 5]} />
+                      <defs>
+                        {statsData.servicesByType.map((_, i) => (
+                          <linearGradient key={i} id={`pieGradient${i}`} x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor={['#0033A0', '#E31837', '#FFC72C', '#28A745', '#6F42C1'][i % 5]} />
+                            <stop offset="100%" stopColor={['#0033A0', '#E31837', '#FFC72C', '#28A745', '#6F42C1'][i % 5]} stopOpacity={0.7} />
+                          </linearGradient>
+                        ))}
+                      </defs>
+                      <Pie 
+                        data={statsData.servicesByType} 
+                        dataKey="value" 
+                        nameKey="name" 
+                        cx="50%" 
+                        cy="50%" 
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={4}
+                        animationDuration={1500}
+                      >
+                        {statsData.servicesByType.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={`url(#pieGradient${index})`} stroke="none" />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
+                  {/* Legend */}
+                  <div className="flex flex-wrap justify-center gap-3 mt-4">
+                    {statsData.servicesByType.slice(0, 5).map((item, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs font-bold">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#0033A0', '#E31837', '#FFC72C', '#28A745', '#6F42C1'][i % 5] }}></div>
+                        <span className="text-slate-600 dark:text-slate-300">{item.name}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* Top Club */}
+              {/* Top Club con card animate */}
               {statsData.topClubs.length > 0 && (
-                <div className="bg-white dark:bg-white/[0.08] p-6 rounded-[2rem] border border-slate-200 dark:border-white/20">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-4">Top 10 Club</h3>
-                  <div className="space-y-3">
-                    {statsData.topClubs.slice(0, 5).map((club, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <span className={`font-black text-sm w-6 ${i === 0 ? 'text-brand-yellow' : 'text-slate-400'}`}>#{i + 1}</span>
-                        <div className="flex-1 h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-                          <div className="h-full bg-brand-blue" style={{ width: `${(club.score / statsData.topClubs[0].score) * 100}%` }} />
+                <div className="bg-gradient-to-br from-white to-slate-50 dark:from-white/[0.08] dark:to-white/[0.02] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-brand-yellow/10 rounded-full blur-3xl"></div>
+                  <h3 className="text-lg font-black uppercase tracking-widest text-brand-yellow mb-6 flex items-center gap-2">
+                    <span className="w-3 h-3 bg-brand-yellow rounded-full animate-pulse"></span>
+                    Top Club
+                  </h3>
+                  <div className="space-y-4">
+                    {statsData.topClubs.slice(0, 6).map((club, i) => (
+                      <div 
+                        key={i} 
+                        className={`relative p-4 rounded-2xl border transition-all hover:scale-[1.02] cursor-pointer ${
+                          i === 0 
+                            ? 'bg-gradient-to-r from-brand-yellow/20 to-transparent border-brand-yellow/50 shadow-lg' 
+                            : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'
+                        }`}
+                        style={{ animationDelay: `${i * 100}ms` }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg ${
+                            i === 0 ? 'bg-gradient-to-br from-brand-yellow to-amber-500 text-brand-dark' : 
+                            i === 1 ? 'bg-slate-300 text-slate-600' :
+                            i === 2 ? 'bg-amber-700 text-white' :
+                            'bg-slate-100 dark:bg-white/10 text-brand-blue'
+                          }`}>
+                            {i + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-black text-sm uppercase">{club.name}</div>
+                            <div className="h-2 mt-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full transition-all duration-1000 ${i === 0 ? 'bg-brand-yellow' : 'bg-brand-blue'}`} 
+                                style={{ width: `${(club.score / statsData.topClubs[0].score) * 100}%` }} 
+                              />
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-black text-brand-blue">{club.score}</div>
+                            <div className="text-[10px] uppercase text-slate-400 font-bold">punti</div>
+                          </div>
                         </div>
-                        <span className="text-sm font-bold">{club.score}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
             </div>
+
+            {/* Chart orizzontale per mesi */}
+            {statsData.servicesByMonth.length > 1 && (
+              <div className="bg-gradient-to-br from-brand-dark to-slate-900 p-8 rounded-[3rem] shadow-2xl text-white">
+                <h3 className="text-lg font-black uppercase tracking-widest text-brand-yellow mb-6 flex items-center gap-2">
+                  <span className="w-3 h-3 bg-brand-yellow rounded-full animate-pulse"></span>
+                  Andamento nel Tempo
+                </h3>
+                <div className="flex items-end justify-between gap-2 h-40">
+                  {statsData.servicesByMonth.map((item, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <div 
+                        className="w-full bg-gradient-to-t from-brand-blue to-brand-yellow rounded-t-lg transition-all duration-1000 hover:opacity-80"
+                        style={{ height: `${(item.service / Math.max(...statsData.servicesByMonth.map(d => d.service))) * 100}%` }}
+                      />
+                      <span className="text-[10px] font-bold opacity-60">{item.month.split('-')[1]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
