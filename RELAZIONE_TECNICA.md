@@ -51,6 +51,7 @@ ServiceScore/
 │   │   ├── DashboardView.jsx
 │   │   ├── InsertWizardView.jsx
 │   │   ├── LoginView.jsx
+│   │   ├── PublicView.jsx  ← Dashboard pubblica per visitatori
 │   │   ├── SuccessView.jsx
 │   │   └── AccountView.jsx
 │   ├── App.jsx          # Componente principale + routing

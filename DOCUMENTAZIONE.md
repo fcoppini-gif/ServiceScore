@@ -35,7 +35,7 @@ L'applicazione è una **Single Page Application (SPA)** con routing React Router
 
 | URL | Pagina | Chi |
 |---|---|---|
-| `/` | Redirect a installazione per nuovi visitatori | Non loggato |
+| `/` | Dashboard pubblica (landing page + classifica) | Tutti |
 | `/login` | Login/registrazione | Non loggato |
 | `/dashboard` | Classifica club | Tutti (filtrata se referente) |
 | `/insert` | Wizard inserimento 3 step | Tutti (solo club associati se referente) |
@@ -518,3 +518,11 @@ Le statistiche sono ora accessibili anche ai referenti (non solo admin), con dat
 - **PWA**: service worker inline per compatibilità con Rolldown (Vite 8)
 - **Overflow**: fix scrollbar orizzontale con `overflow-x: hidden` su html/body
 - **Indipendenza Statistiche**: stato delle statistiche gestito internamente in DashboardView
+
+### Dashboard Pubblica per Visitatori
+- **PublicView**: nuova pagina accessibile senza login su `/`
+- **Landing Page**: hero con logo, descrizione e CTA per registrazione
+- **Classifica Pubblica**: primi 10 club con punteggi, progress bar e medaglie
+- **Statistiche Pubbliche**: KPI cards, grafico andamento mensile, distribuzione per tipologia
+- **Routing**: `/` mostra PublicView per visitatori, redirect a `/dashboard` per utenti loggati
+- **Tema**: supporta tema chiaro/scuro

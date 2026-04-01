@@ -50,6 +50,7 @@ I Lions Club gestiscono manualmente centinaia di service ogni anno, con un dispe
 
 | Funzionalità | Descrizione |
 |--------------|-------------|
+| 🌐 **Dashboard Pubblica** | Pagina accessibile senza login con landing page, classifica e statistiche |
 | 📊 **Statistiche per Tutti** | Le statistiche sono ora accessibili anche ai referenti, con dati solo dei propri club |
 | 🎨 **Animazioni Eleganti** | Aurora background, stagger items, hover lift, shimmer text - tutto molto morbido |
 | 📊 **Statistiche Ultra** | Dashboard spettacolare con KPI, grafici gradient, top club con medaglie |
