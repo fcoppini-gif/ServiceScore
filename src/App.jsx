@@ -13,6 +13,7 @@ import InsertWizardView from './views/InsertWizardView';
 import SuccessView from './views/SuccessView';
 import AccountView from './views/AccountView';
 import AdminView from './views/AdminView';
+import PublicView from './views/PublicView';
 import { I18nProvider } from './lib/i18n';
 
 function AppContent() {
@@ -54,12 +55,15 @@ function AppContent() {
       return;
     }
     
-    if (!hasVisited && !user && !isStandalone) {
-      console.log('[App] Redirecting to installazione.html');
-      window.location.href = '/installazione.html';
-    } else if (user) {
+    // Se è un utente loggato, marca come visitato
+    if (user) {
       localStorage.setItem('hasVisited', 'true');
-    } else {
+      return;
+    }
+
+    // Per visitatori non loggati: mostra PublicView (non redirect più a installazione)
+    // Mantieni hasVisited per non ripetere il check
+    if (!hasVisited && !isStandalone) {
       localStorage.setItem('hasVisited', 'true');
     }
   }, [loading, user]);
@@ -125,9 +129,14 @@ function AppContent() {
     <>
       <ToastContainer />
       <Routes>
+        {/* Public routes - accessible without login */}
+        <Route path="/" element={
+          user ? <Navigate to="/dashboard" replace /> : <PublicView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
+        } />
         <Route path="/login" element={
           user ? <Navigate to="/dashboard" replace /> : <LoginView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
         } />
+        {/* Protected routes - require login */}
         <Route path="/dashboard" element={
           user ? <DashboardView {...authProps} /> : <Navigate to="/login" replace />
         } />
@@ -143,7 +152,7 @@ function AppContent() {
         <Route path="/admin/:section?" element={
           user ? (isAdmin ? <AdminView {...authProps} /> : <Navigate to="/dashboard" replace />) : <Navigate to="/login" replace />
         } />
-        <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={user ? '/dashboard' : '/'} replace />} />
       </Routes>
     </>
   );
