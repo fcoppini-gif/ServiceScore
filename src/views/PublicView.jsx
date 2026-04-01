@@ -5,13 +5,72 @@
 // Accessibile senza login
 // =============================================================================
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, BarChart3, Users, Building2, ArrowRight, LogIn } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandLogo from '../components/BrandLogo';
 import Footer from '../components/Footer';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+// Sparkle colors for click effects
+const SPARKLE_COLORS = ['#0033A0', '#E31837', '#FFC72C', '#8B5CF6', '#10B981'];
+
+function createSparkles(x, y, count = 12) {
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'sparkle-particle';
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+    const distance = 30 + Math.random() * 60;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+    particle.style.cssText = `
+      left: ${x}px; top: ${y}px;
+      background: ${SPARKLE_COLORS[i % SPARKLE_COLORS.length]};
+      box-shadow: 0 0 6px ${SPARKLE_COLORS[i % SPARKLE_COLORS.length]};
+      --dx: ${dx}px; --dy: ${dy}px;
+      width: ${3 + Math.random() * 5}px;
+      height: ${3 + Math.random() * 5}px;
+    `;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 900);
+  }
+}
+
+function createConfetti(x, y, count = 20) {
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'confetti-particle';
+    const angle = (Math.PI * 2 * i) / count;
+    const distance = 40 + Math.random() * 80;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance - 30;
+    const rot = (Math.random() - 0.5) * 720;
+    const size = 4 + Math.random() * 6;
+    const colors = ['#0033A0', '#E31837', '#FFC72C', '#ffffff'];
+    particle.style.cssText = `
+      left: ${x}px; top: ${y}px;
+      width: ${size}px; height: ${size * (0.5 + Math.random())}px;
+      background: ${colors[i % colors.length]};
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+      --dx: ${dx}px; --dy: ${dy}px; --rot: ${rot}deg;
+    `;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 1300);
+  }
+}
+
+function createRipple(e, element) {
+  const rect = element.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = e.clientX - rect.left - size / 2;
+  const y = e.clientY - rect.top - size / 2;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple-ring';
+  ripple.style.cssText = `width: ${size}px; height: ${size}px; left: ${x}px; top: ${y}px;`;
+  element.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 700);
+}
 
 export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
   const navigate = useNavigate();
@@ -87,12 +146,20 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
     <div className="min-h-screen bg-slate-50 dark:bg-[#060D1F] transition-colors duration-500 aurora-bg overflow-x-hidden">
       {/* Top bar */}
       <nav className="relative z-50 flex justify-between items-center px-6 py-4">
-        <BrandLogo className="h-8" />
+        <div 
+          className="cursor-pointer click-pop"
+          onClick={(e) => { createSparkles(e.clientX, e.clientY, 8); }}
+        >
+          <BrandLogo className="h-8" />
+        </div>
         <div className="flex items-center gap-3">
           <ThemeSwitcher />
           <button
-            onClick={() => navigate('/login')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer border-none hover-lift shadow-lg shadow-brand-blue/20"
+            onClick={(e) => {
+              createSparkles(e.clientX, e.clientY, 15);
+              setTimeout(() => navigate('/login'), 200);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer border-none hover-lift shadow-lg shadow-brand-blue/20 ripple-click click-pop"
           >
             <LogIn size={16} /> Accedi
           </button>
@@ -102,7 +169,10 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 pb-24">
         {/* HERO */}
         <section className="text-center py-16 sm:py-24 space-y-6 animate-fade-in-up">
-          <div className="inline-block">
+          <div 
+            className="inline-block cursor-pointer click-pop"
+            onClick={(e) => createConfetti(e.clientX, e.clientY, 25)}
+          >
             <BrandLogo className="h-20 sm:h-28 mb-4" />
           </div>
           <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tighter text-brand-dark dark:text-white">
@@ -114,14 +184,18 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <button
-              onClick={() => navigate('/login')}
-              className="cursor-pointer bg-gradient-to-r from-brand-blue to-brand-blue/90 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-brand-blue/20 hover-lift transition-all text-sm uppercase tracking-wider border-none"
+              onClick={(e) => {
+                createConfetti(e.clientX, e.clientY, 30);
+                setTimeout(() => navigate('/login'), 300);
+              }}
+              className="cursor-pointer bg-gradient-to-r from-brand-blue to-brand-blue/90 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-brand-blue/20 hover-lift transition-all text-sm uppercase tracking-wider border-none ripple-click click-pop"
             >
               Inizia Ora — È Gratis
             </button>
             <a
               href="#classifica"
-              className="cursor-pointer bg-white dark:bg-white/[0.05] text-brand-blue dark:text-brand-yellow font-black px-8 py-4 rounded-2xl border border-slate-200 dark:border-white/[0.06] hover-lift transition-all text-sm uppercase tracking-wider text-center"
+              onClick={(e) => createSparkles(e.clientX, e.clientY, 10)}
+              className="cursor-pointer bg-white dark:bg-white/[0.05] text-brand-blue dark:text-brand-yellow font-black px-8 py-4 rounded-2xl border border-slate-200 dark:border-white/[0.06] hover-lift transition-all text-sm uppercase tracking-wider text-center click-pop"
             >
               Vedi Classifica ↓
             </a>
@@ -136,7 +210,11 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
             { label: 'Punteggio Max', value: Math.round(stats.topScore), icon: BarChart3, color: 'from-brand-yellow to-amber-500' },
             { label: 'Referenti', value: '—', icon: Users, color: 'from-purple-600 to-purple-500' },
           ].map((kpi, i) => (
-            <div key={i} className={`bg-gradient-to-br ${kpi.color} p-5 rounded-2xl text-white shadow-lg`}>
+            <div
+              key={i}
+              onClick={(e) => createSparkles(e.clientX, e.clientY, 15)}
+              className={`bg-gradient-to-br ${kpi.color} p-5 rounded-2xl text-white shadow-lg cursor-pointer click-pop hover-lift`}
+            >
               <kpi.icon size={20} className="opacity-70 mb-2" />
               <div className="text-2xl sm:text-3xl font-black">{kpi.value}</div>
               <div className="text-[9px] font-bold uppercase tracking-widest opacity-80 mt-1">{kpi.label}</div>
@@ -167,7 +245,10 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
                 return (
                   <div
                     key={i}
-                    className={`relative overflow-hidden p-4 sm:p-5 rounded-2xl border transition-all stagger-item hover-magnetic ${
+                    onClick={(e) => {
+                      createSparkles(e.clientX, e.clientY, 8);
+                    }}
+                    className={`relative overflow-hidden p-4 sm:p-5 rounded-2xl border transition-all stagger-item hover-magnetic cursor-pointer click-pop ${
                       i === 0
                         ? 'bg-gradient-to-r from-brand-yellow/[0.08] to-transparent dark:from-brand-yellow/[0.04] border-brand-yellow/30 dark:border-brand-yellow/15'
                         : 'bg-white dark:bg-white/[0.03] border-slate-200/60 dark:border-white/[0.04]'
@@ -229,8 +310,11 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
           {leaderboard.length > 0 && (
             <div className="text-center pt-4">
               <button
-                onClick={() => navigate('/login')}
-                className="inline-flex items-center gap-2 text-brand-blue dark:text-brand-yellow font-black text-xs uppercase tracking-widest hover:gap-3 transition-all cursor-pointer"
+                onClick={(e) => {
+                  createSparkles(e.clientX, e.clientY, 12);
+                  setTimeout(() => navigate('/login'), 250);
+                }}
+                className="inline-flex items-center gap-2 text-brand-blue dark:text-brand-yellow font-black text-xs uppercase tracking-widest hover:gap-3 transition-all cursor-pointer click-pop"
               >
                 Vedi tutti i dettagli <ArrowRight size={14} />
               </button>
@@ -306,7 +390,10 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
         )}
 
         {/* CTA SECTION */}
-        <section className="text-center py-16 space-y-6 bg-gradient-to-br from-brand-blue/[0.04] to-brand-yellow/[0.04] dark:from-brand-blue/[0.02] dark:to-brand-yellow/[0.02] rounded-3xl mb-8">
+        <section 
+          className="text-center py-16 space-y-6 bg-gradient-to-br from-brand-blue/[0.04] to-brand-yellow/[0.04] dark:from-brand-blue/[0.02] dark:to-brand-yellow/[0.02] rounded-3xl mb-8"
+          onClick={(e) => createSparkles(e.clientX, e.clientY, 5)}
+        >
           <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-brand-dark dark:text-white">
             Partecipa al <span className="text-brand-blue dark:text-brand-yellow">Service</span>
           </h2>
@@ -314,8 +401,12 @@ export default function PublicView({ resolvedTheme, ThemeSwitcher }) {
             Registrati per inserire i tuoi service, monitorare il tuo club e contribuire alla classifica Lions.
           </p>
           <button
-            onClick={() => navigate('/login')}
-            className="cursor-pointer bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow text-white font-black px-10 py-5 rounded-2xl shadow-xl hover-lift transition-all text-base uppercase tracking-wider border-none"
+            onClick={(e) => {
+              createConfetti(e.clientX, e.clientY, 40);
+              createSparkles(e.clientX, e.clientY, 20);
+              setTimeout(() => navigate('/login'), 400);
+            }}
+            className="cursor-pointer bg-gradient-to-r from-brand-blue via-brand-red to-brand-yellow text-white font-black px-10 py-5 rounded-2xl shadow-xl hover-lift transition-all text-base uppercase tracking-wider border-none ripple-click click-pop"
           >
             Registrati Ora — È Gratuito
           </button>
