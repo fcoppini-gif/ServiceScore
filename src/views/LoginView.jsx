@@ -186,6 +186,12 @@ export default function LoginView({ resolvedTheme, ThemeSwitcher }) {
             {/* Link al sito e privacy */}
             <div className="mt-6 text-center space-y-2">
               <a 
+                href="/"
+                className="block text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow/70 hover:text-brand-blue dark:hover:text-brand-yellow transition-colors"
+              >
+                ← Vedi Classifica Pubblica
+              </a>
+              <a 
                 href="https://www.info01.it/" 
                 target="_blank" 
                 rel="noopener noreferrer"
