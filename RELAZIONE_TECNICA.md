@@ -253,6 +253,16 @@ punti = (valore_inserito / range_max) * punti_max
 - **Admin**: tabs con shadow brand, layout più compatto
 - **Footer**: più sottile e minimal, testo più piccolo
 
+### 14. Animazioni Click Spettacolari
+- **File**: `src/views/PublicView.jsx` (funzioni createSparkles, createConfetti, createRipple)
+- **CSS**: `src/index.css` (keyframes ripple-expand, confetti-fall, sparkle-pop, pulse-ring-out, click-pop-anim)
+- **Sparkle Burst**: 10-15 puntini luminosi colorati generati dinamicamente dal punto di click
+- **Confetti Burst**: 20-40 particelle colorate (rettangoli e cerchi) che esplodono verso l'alto
+- **Ripple Effect**: cerchio trasparente che si espande dal punto di click
+- **Click Pop**: leggero rimbalzo al click (scale 0.95 → 1)
+- **Applicato a**: logo, pulsanti, KPI cards, leaderboard items, CTA finale
+- **Funzioni**: `createSparkles(x, y, count)`, `createConfetti(x, y, count)`, `createRipple(e, element)`
+
 ---
 
 ## API e Query

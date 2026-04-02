@@ -526,3 +526,10 @@ Le statistiche sono ora accessibili anche ai referenti (non solo admin), con dat
 - **Statistiche Pubbliche**: KPI cards, grafico andamento mensile, distribuzione per tipologia
 - **Routing**: `/` mostra PublicView per visitatori, redirect a `/dashboard` per utenti loggati
 - **Tema**: supporta tema chiaro/scuro
+
+### Animazioni Click Spettacolari
+- **Sparkle Burst**: 10-15 puntini luminosi colorati esplodono dal punto di click (su logo, KPI cards, leaderboard)
+- **Confetti Burst**: 20-40 particelle colorate che esplodono verso l'alto (su CTA "Inizia Ora", "Registrati Ora")
+- **Ripple Effect**: cerchio trasparente che si espande dal punto di click (su tutti i pulsanti)
+- **Click Pop**: leggero rimbalzo al click (scale 0.95 → 1) su tutti gli elementi interattivi
+- **CSS**: keyframes per ripple-expand, confetti-fall, sparkle-pop, pulse-ring-out, click-pop-anim
