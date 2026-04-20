@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, User, Settings, Shield, ChevronDown, Globe, Filter, Plus, Trophy, Menu, X, ArrowLeft } from 'lucide-react';
+import { LogOut, User, Settings, Shield, ChevronDown, Globe, Filter, Plus, Trophy, Menu, X, ArrowLeft, Users, UserCheck, Heart } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandLogo from './BrandLogo';
 import { useI18n } from '../lib/i18n';
@@ -30,7 +30,9 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
   ];
 
   if (isAdmin) {
-    navButtons.push({ path: '/nuovo-service', label: 'Nuovo', icon: Plus });
+    navButtons.push({ path: '/nuovo-service', label: 'Service', icon: Heart });
+    navButtons.push({ path: '/nuovo-socio', label: 'Socio', icon: Users });
+    navButtons.push({ path: '/nuovo-officer', label: 'Officer', icon: UserCheck });
     navButtons.push({ path: '/admin/utenti', label: 'Admin', icon: Shield });
   }
 
