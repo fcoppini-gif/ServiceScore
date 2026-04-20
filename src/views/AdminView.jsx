@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Plus, Trash2, Edit3, Save, X, Trophy, Users, Building2, Layers, Settings, Activity,
-  Link2, Unlink, ArrowRight, Upload, TrendingUp,
+  Link2, Unlink, ArrowRight, Upload, TrendingUp, MapPin, Calendar, Heart, DollarSign,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
@@ -54,6 +54,11 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
 
   // Statistiche
   const [statsData, setStatsData] = useState({ servicesByMonth: [], servicesByType: [], topClubs: [] });
+
+  // Lions Activities (nuove tabelle)
+  const [lionsClubs, setLionsClubs] = useState([]);
+  const [lionsOfficers, setLionsOfficers] = useState([]);
+  const [lionsActivities, setLionsActivities] = useState([]);
 
   // =========================================================================
   // FETCH
@@ -165,6 +170,22 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
     setAllClubs(clubs || []);
   };
 
+  // Fetch Lions data (nuovo)
+  const fetchLionsClubs = async () => {
+    const { data } = await supabase.from('club').select('*').order('nome');
+    setLionsClubs(data || []);
+  };
+
+  const fetchLionsOfficers = async () => {
+    const { data } = await supabase.from('officer').select('*').order('club_name');
+    setLionsOfficers(data || []);
+  };
+
+  const fetchLionsActivities = async () => {
+    const { data } = await supabase.from('service_activities').select('*').order('data_inizio', { ascending: false });
+    setLionsActivities(data || []);
+  };
+
   useEffect(() => {
     const run = async () => {
       if (section === 'classifica') await fetchLeaderboard();
@@ -173,6 +194,9 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
       if (section === 'service') { await fetchServices(); await fetchClubs(); }
       if (section === 'regole') await fetchRules();
       if (section === 'utenti') await fetchUsers();
+      if (section === 'lions-club') await fetchLionsClubs();
+      if (section === 'lions-officer') await fetchLionsOfficers();
+      if (section === 'lions-activity') await fetchLionsActivities();
     };
     run();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -390,6 +414,9 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
     { id: 'service', label: 'Service', icon: Layers },
     { id: 'regole', label: 'Regole', icon: Settings },
     { id: 'utenti', label: 'Utenti', icon: Users },
+    { id: 'lions-club', label: 'Lions Club', icon: MapPin },
+    { id: 'lions-officer', label: 'Officer', icon: Users },
+    { id: 'lions-activity', label: 'Attività', icon: Heart },
   ];
 
   return (
@@ -926,6 +953,104 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* LIONS CLUB - Nuova sezione per club Lions */}
+        {section === 'lions-club' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black uppercase">Club Lions ({lionsClubs.length})</h2>
+            </div>
+            {lionsClubs.length === 0 ? (
+              <div className="text-center p-12 bg-white dark:bg-white/[0.08] rounded-2xl text-slate-500">Nessun club</div>
+            ) : (
+              <div className="grid gap-4">
+                {lionsClubs.map((club) => (
+                  <div key={club.id} className="bg-white dark:bg-white/[0.08] p-6 rounded-2xl border border-slate-200 dark:border-white/20">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-black text-lg">{club.nome}</div>
+                        <div className="text-xs text-slate-500 mt-1">ID Lions: {club.id_lions}</div>
+                      </div>
+                      <div className="text-right text-xs">
+                        <div className="text-brand-blue dark:text-brand-yellow">{club.circoscrizione}</div>
+                        <div className="text-slate-400">{club.zona}</div>
+                        <div className="text-slate-500">{club.distretto}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* LIONS OFFICER - Nuova sezione per officer */}
+        {section === 'lions-officer' && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-black uppercase">Officer ({lionsOfficers.length})</h2>
+            {lionsOfficers.length === 0 ? (
+              <div className="text-center p-12 bg-white dark:bg-white/[0.08] rounded-2xl text-slate-500">Nessun officer</div>
+            ) : (
+              <div className="grid gap-3">
+                {lionsOfficers.map((o, i) => (
+                  <div key={i} className="bg-white dark:bg-white/[0.08] p-4 rounded-2xl border border-slate-200 dark:border-white/20 flex justify-between items-center">
+                    <div>
+                      <div className="font-bold">{o.club_name}</div>
+                      <div className="text-xs text-slate-500">{o.nome} {o.cognome}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-black text-brand-blue">{o.titolo}</div>
+                      <div className="text-xs text-slate-400">{o.data_inizio} - {o.data_fine}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* LIONS ACTIVITY - Nuova sezione per attività */}
+        {section === 'lions-activity' && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-black uppercase">Attività di Service ({lionsActivities.length})</h2>
+            {lionsActivities.length === 0 ? (
+              <div className="text-center p-12 bg-white dark:bg-white/[0.08] rounded-2xl text-slate-500">Nessuna attività</div>
+            ) : (
+              <div className="space-y-3">
+                {lionsActivities.map((a, i) => (
+                  <div key={i} className="bg-white dark:bg-white/[0.08] p-5 rounded-2xl border border-slate-200 dark:border-white/20">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-black text-brand-blue">{a.titolo}</div>
+                      <div className="text-xs px-2 py-1 bg-brand-yellow/20 rounded-full text-brand-dark">{a.causa}</div>
+                    </div>
+                    <div className="text-xs text-slate-500 mb-2">{a.club_name}</div>
+                    <div className="text-xs text-slate-400 mb-3">
+                      {a.data_inizio} - {a.data_conclusione}
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-center">
+                      <div className="bg-slate-100 dark:bg-white/5 p-2 rounded-lg">
+                        <div className="text-lg font-black">{a.persone_servite}</div>
+                        <div className="text-[8px] uppercase">Persone</div>
+                      </div>
+                      <div className="bg-slate-100 dark:bg-white/5 p-2 rounded-lg">
+                        <div className="text-lg font-black">{a.totale_volontari}</div>
+                        <div className="text-[8px] uppercase">Volontari</div>
+                      </div>
+                      <div className="bg-slate-100 dark:bg-white/5 p-2 rounded-lg">
+                        <div className="text-lg font-black">{a.totale_ore_servizio}</div>
+                        <div className="text-[8px] uppercase">Ore</div>
+                      </div>
+                      <div className="bg-slate-100 dark:bg-white/5 p-2 rounded-lg">
+                        <div className="text-lg font-black">€{a.fondi_donati}</div>
+                        <div className="text-[8px] uppercase">Fondi</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

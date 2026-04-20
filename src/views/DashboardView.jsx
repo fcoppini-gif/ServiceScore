@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Plus, Shield, Download, BarChart3 } from 'lucide-react';
+import { Trophy, Plus, Shield, Download, BarChart3, Heart, Users, Clock, DollarSign, Building2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -20,7 +20,9 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
   const [leaderboard, setLeaderboard] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showStats, setShowStats] = useState(false);
+  const [showLionsStats, setShowLionsStats] = useState(false);
   const [statsData, setStatsData] = useState({ servicesByMonth: [], servicesByType: [], topClubs: [] });
+  const [lionsStats, setLionsStats] = useState({ total: 0, clubs: 0, persone: 0, volontari: 0, ore: 0, fondi: 0, byCausa: [] });
 
   const exportPDF = () => {
     const doc = new jsPDF();
@@ -138,6 +140,41 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
     fetchStats();
   }, [isAdmin, userClubs]);
 
+  // Fetch Lions Activities stats
+  useEffect(() => {
+    const fetchLionsStats = async () => {
+      const { data: activities } = await supabase.from('service_activities').select('*');
+      const { data: clubs } = await supabase.from('club').select('id');
+      
+      if (!activities) return;
+      
+      const byCausa = {};
+      let totalePersone = 0, totaleVolontari = 0, totaleOre = 0, totaleFondi = 0;
+      
+      activities.forEach(a => {
+        totalePersone += a.persone_servite || 0;
+        totaleVolontari += a.totale_volontari || 0;
+        totaleOre += a.totale_ore_servizio || 0;
+        totaleFondi += a.fondi_donati || 0;
+        
+        const causa = a.causa || 'Altro';
+        byCausa[causa] = (byCausa[causa] || 0) + 1;
+      });
+      
+      setLionsStats({
+        total: activities.length,
+        clubs: clubs?.length || 0,
+        persone: totalePersone,
+        volontari: totaleVolontari,
+        ore: totaleOre,
+        fondi: totaleFondi,
+        byCausa: Object.entries(byCausa).map(([name, value]) => ({ name, value }))
+      });
+    };
+    
+    fetchLionsStats();
+  }, []);
+
   if (showStats) {
     return (
       <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 aurora-bg">
@@ -240,6 +277,90 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
     );
   }
 
+  // Lions Activities Stats View
+  if (showLionsStats) {
+    return (
+      <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 aurora-bg">
+        <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
+        <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-12 space-y-8 pb-24 text-brand-dark dark:text-white animate-fade-in-up">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setShowLionsStats(false)}
+              className="cursor-pointer bg-brand-blue dark:bg-brand-yellow text-white dark:text-brand-dark font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg hover-lift transition-all border-none"
+            >
+              ← Classifica
+            </button>
+          </div>
+          
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-black uppercase tracking-tight text-brand-red dark:text-brand-yellow">Attività Lions</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest">Service Activities</p>
+          </div>
+          
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="bg-gradient-to-br from-brand-red to-brand-red/80 p-5 rounded-2xl text-white shadow-xl">
+              <Heart size={20} className="opacity-70 mb-2" />
+              <div className="text-3xl font-black">{lionsStats.total}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Attività</div>
+            </div>
+            <div className="bg-gradient-to-br from-brand-blue to-brand-blue/80 p-5 rounded-2xl text-white shadow-xl">
+              <Building2 size={20} className="opacity-70 mb-2" />
+              <div className="text-3xl font-black">{lionsStats.clubs}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Club</div>
+            </div>
+            <div className="bg-gradient-to-br from-green-500 to-green-600 p-5 rounded-2xl text-white shadow-xl">
+              <Users size={20} className="opacity-70 mb-2" />
+              <div className="text-3xl font-black">{lionsStats.persone}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Persone</div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-5 rounded-2xl text-white shadow-xl">
+              <Users size={20} className="opacity-70 mb-2" />
+              <div className="text-3xl font-black">{lionsStats.volontari}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Volontari</div>
+            </div>
+            <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-5 rounded-2xl text-white shadow-xl">
+              <Clock size={20} className="opacity-70 mb-2" />
+              <div className="text-3xl font-black">{lionsStats.ore}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Ore</div>
+            </div>
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 rounded-2xl text-white shadow-xl">
+              <DollarSign size={20} className="opacity-70 mb-2" />
+              <div className="text-3xl font-black">€{lionsStats.fondi}</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Fondi</div>
+            </div>
+          </div>
+          
+          {/* Causa Distribution */}
+          {lionsStats.byCausa.length > 0 && (
+            <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[3rem] border border-slate-200 dark:border-white/20 shadow-2xl">
+              <h3 className="text-lg font-black uppercase tracking-widest text-brand-blue dark:text-brand-yellow mb-6">Attività per Causa</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={lionsStats.byCausa}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {lionsStats.byCausa.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#0033A0', '#E31837', '#FFC72C', '#8B5CF6', '#10B981', '#F59E0B', '#EC4899'][index % 7]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-[#060D1F] transition-colors duration-500 aurora-bg">
       <Navbar isAdmin={isAdmin} userProfile={userProfile} ThemeSwitcher={ThemeSwitcher} />
@@ -270,6 +391,14 @@ export default function DashboardView({ isAdmin, userClubs, userProfile, ThemeSw
               >
                 <BarChart3 size={18} /> {showStats ? 'CLASSIFICA' : 'STATISTICHE'}
               </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowLionsStats(!showLionsStats)}
+                  className="w-full sm:w-auto cursor-pointer bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-yellow font-black px-7 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-brand-red/10 hover-lift transition-all text-sm border-none"
+                >
+                  <Heart size={18} /> {showLionsStats ? 'CLASSIFICA' : 'ATTIVITÀ'}
+                </button>
+              )}
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin/classifica')}
