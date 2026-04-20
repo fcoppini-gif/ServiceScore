@@ -14,7 +14,7 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, Settings, Shield, BarChart3, ChevronDown, Globe, Filter } from 'lucide-react';
+import { LogOut, User, Settings, Shield, BarChart3, ChevronDown, Globe, Filter, Plus, Trophy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandLogo from './BrandLogo';
 import { useI18n } from '../lib/i18n';
@@ -38,7 +38,7 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
       {/* Link selezioni (per tutti gli utenti) */}
       <button
         onClick={() => navigate('/selezioni')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
           location.pathname.includes('/selezioni')
             ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/25'
             : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10 hover:shadow-md'
@@ -46,6 +46,32 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
       >
         <Filter size={14} /> <span className="hidden sm:inline">Selezioni</span>
       </button>
+
+      {/* Link classifica */}
+      <button
+        onClick={() => navigate('/classifica')}
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
+          location.pathname.includes('/classifica')
+            ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/25'
+            : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10 hover:shadow-md'
+        }`}
+      >
+        <Trophy size={14} /> <span className="hidden sm:inline">Classifica</span>
+      </button>
+
+      {/* Link nuovo service (per admin) */}
+      {isAdmin && (
+        <button
+          onClick={() => navigate('/nuovo-service')}
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
+            location.pathname.includes('/nuovo-service')
+              ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/25'
+              : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10 hover:shadow-md'
+          }`}
+        >
+          <Plus size={14} /> <span className="hidden sm:inline">Nuovo</span>
+        </button>
+      )}
 
       {/* Link admin (visibili solo se admin) */}
       {isAdmin && (
