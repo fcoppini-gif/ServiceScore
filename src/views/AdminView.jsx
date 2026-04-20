@@ -408,15 +408,11 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   // TABS
   // =========================================================================
   const tabs = [
-    { id: 'classifica', label: 'Classifica', icon: Trophy },
-    { id: 'statistiche', label: 'Statistiche', icon: TrendingUp },
-    { id: 'club', label: 'Club', icon: Building2 },
-    { id: 'service', label: 'Service', icon: Layers },
-    { id: 'regole', label: 'Regole', icon: Settings },
-    { id: 'utenti', label: 'Utenti', icon: Users },
-    { id: 'lions-club', label: 'Lions Club', icon: MapPin },
+    { id: 'lions-club', label: 'Club', icon: Building2 },
     { id: 'lions-officer', label: 'Officer', icon: Users },
     { id: 'lions-activity', label: 'Attività', icon: Heart },
+    { id: 'statistiche', label: 'Statistiche', icon: TrendingUp },
+    { id: 'utenti', label: 'Utenti', icon: Users },
   ];
 
   return (
@@ -438,31 +434,6 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
             </button>
           ))}
         </div>
-
-        {/* CLASSIFICA */}
-        {section === 'classifica' && (
-          <div className="space-y-4">
-            {leaderboard.length === 0 ? (
-              <div className="text-center p-16 bg-white dark:bg-white/[0.08] rounded-[3rem] border border-dashed border-slate-300 dark:border-white/20 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs italic">Nessun dato presente.</div>
-            ) : leaderboard.map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-6 bg-white dark:bg-white/[0.08] rounded-[2.5rem] border border-slate-200 dark:border-white/20 shadow-sm">
-                <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 flex items-center justify-center rounded-[1.25rem] font-black text-xl shadow-inner overflow-hidden ${
-                    i === 0 ? 'bg-gradient-to-br from-brand-yellow to-amber-500 text-brand-dark' : i === 1 ? 'bg-slate-300 text-slate-700' : 'bg-slate-50 dark:bg-white/10 text-brand-blue dark:text-white'
-                  }`}>
-                    {item.logo ? (
-                      <img src={item.logo} alt={item.nome} className="w-full h-full object-cover" />
-                    ) : (
-                      `#${i + 1}`
-                    )}
-                  </div>
-                  <span className="text-lg font-black uppercase tracking-tight">{item.nome}</span>
-                </div>
-                <div className="text-3xl font-black text-brand-blue dark:text-white">{item.score.toFixed(1)}</div>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* STATISTICHE */}
         {section === 'statistiche' && (
