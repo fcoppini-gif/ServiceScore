@@ -39,7 +39,14 @@ export default function DataManager({ table, onClose }) {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: result } = await supabase.from(table).select('*').order('id').limit(50);
+    let query = supabase.from(table).select('*').order('id');
+    
+    // For service_activities, filter out empty records
+    if (table === 'service_activities') {
+      query = query.not('titolo', 'is', null);
+    }
+    
+    const { data: result } = await query.limit(100);
     setData(result || []);
     setLoading(false);
   };
@@ -79,7 +86,7 @@ export default function DataManager({ table, onClose }) {
         <div className="p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-black uppercase">{config.title}</h2>
-            <p className="text-sm text-slate-500">Gestione dati • {data.length} record</p>
+            <p className="text-sm text-slate-500">Gestione dati • {data.length} record visualizzati</p>
           </div>
           <div className="flex gap-2">
             <button onClick={startNew} className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-xl font-bold hover:bg-brand-blue/90">
@@ -133,7 +140,11 @@ export default function DataManager({ table, onClose }) {
                 </tr>
               </thead>
               <tbody>
-                {data.map(item => (
+                {data.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center text-slate-500">Nessun record trovato</td>
+                  </tr>
+                ) : data.map(item => (
                   <tr key={item.id} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5">
                     {config.columns.slice(0, 4).map(col => (
                       <td key={col} className="p-3 truncate max-w-[150px]">{item[col] || '-'}</td>
