@@ -15,6 +15,7 @@ import AccountView from './views/AccountView';
 import AdminView from './views/AdminView';
 import PublicView from './views/PublicView';
 import ClubDetailView from './views/ClubDetailView';
+import SelezioniView from './views/SelezioniView';
 import { I18nProvider } from './lib/i18n';
 
 function AppContent() {
@@ -152,6 +153,9 @@ function AppContent() {
         } />
         <Route path="/club/:clubName" element={
           user ? <ClubDetailView {...authProps} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/selezioni" element={
+          user ? <SelezioniView {...authProps} /> : <Navigate to="/login" replace />
         } />
         <Route path="/admin/:section?" element={
           user ? (isAdmin ? <AdminView {...authProps} /> : <Navigate to="/dashboard" replace />) : <Navigate to="/login" replace />

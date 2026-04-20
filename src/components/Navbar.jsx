@@ -14,7 +14,7 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, Settings, Shield, BarChart3, ChevronDown, Globe } from 'lucide-react';
+import { LogOut, User, Settings, Shield, BarChart3, ChevronDown, Globe, Filter } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandLogo from './BrandLogo';
 import { useI18n } from '../lib/i18n';
@@ -33,6 +33,18 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
       {/* Logo */}
       <button onClick={() => navigate('/dashboard')} className="cursor-pointer bg-transparent border-none">
         <BrandLogo className="h-7 sm:h-9" />
+      </button>
+
+      {/* Link selezioni (per tutti gli utenti) */}
+      <button
+        onClick={() => navigate('/selezioni')}
+        className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
+          location.pathname.includes('/selezioni')
+            ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/25'
+            : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10 hover:shadow-md'
+        }`}
+      >
+        <Filter size={14} /> Selezioni
       </button>
 
       {/* Link admin (visibili solo se admin) */}
