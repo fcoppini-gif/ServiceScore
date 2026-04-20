@@ -33,6 +33,7 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
     navButtons.push({ path: '/nuovo-service', label: 'Service', icon: Heart });
     navButtons.push({ path: '/nuovo-socio', label: 'Socio', icon: Users });
     navButtons.push({ path: '/nuovo-officer', label: 'Officer', icon: UserCheck });
+    navButtons.push({ path: '/invita', label: 'Invita', icon: Users });
     navButtons.push({ path: '/admin/utenti', label: 'Admin', icon: Shield });
   }
 

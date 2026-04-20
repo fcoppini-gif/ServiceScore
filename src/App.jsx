@@ -18,6 +18,8 @@ import InsertServiceView from './views/InsertServiceView';
 import InsertMemberView from './views/InsertMemberView';
 import InsertOfficerView from './views/InsertOfficerView';
 import ClassificaView from './views/ClassificaView';
+import RegisterView from './views/RegisterView';
+import InviteView from './views/InviteView';
 import { I18nProvider } from './lib/i18n';
 
 function AppContent() {
@@ -140,6 +142,10 @@ function AppContent() {
         <Route path="/login" element={
           user ? <Navigate to="/dashboard" replace /> : <LoginView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
         } />
+        {/* Public - self-registration */}
+        <Route path="/register" element={
+          user ? <Navigate to="/dashboard" replace /> : <RegisterView />
+        } />
         {/* Protected routes - require login */}
         <Route path="/dashboard" element={
           user ? <DashboardView {...authProps} /> : <Navigate to="/login" replace />
@@ -167,6 +173,10 @@ function AppContent() {
         } />
         <Route path="/admin/:section?" element={
           user ? (isAdmin ? <AdminView {...authProps} /> : <Navigate to="/dashboard" replace />) : <Navigate to="/login" replace />
+        } />
+        {/* Protected - admin only - invite members */}
+        <Route path="/invita" element={
+          user ? (isAdmin ? <InviteView {...authProps} /> : <Navigate to="/dashboard" replace />) : <Navigate to="/login" replace />
         } />
         <Route path="*" element={<Navigate to={user ? '/dashboard' : '/'} replace />} />
       </Routes>
