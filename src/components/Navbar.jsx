@@ -38,13 +38,13 @@ export default function Navbar({ isAdmin, userProfile, ThemeSwitcher }) {
       {/* Link selezioni (per tutti gli utenti) */}
       <button
         onClick={() => navigate('/selezioni')}
-        className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
           location.pathname.includes('/selezioni')
             ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/25'
             : 'bg-transparent text-brand-blue dark:text-white hover:bg-brand-blue/10 hover:shadow-md'
         }`}
       >
-        <Filter size={14} /> Selezioni
+        <Filter size={14} /> <span className="hidden sm:inline">Selezioni</span>
       </button>
 
       {/* Link admin (visibili solo se admin) */}
