@@ -558,6 +558,41 @@ select option:checked {
   font-weight: 700 !important;
 }
 
+/* ===== MOBILE OPTIMIZATIONS ===== */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  
+  body {
+    overscroll-behavior: none;
+  }
+  
+  /* Better touch targets */
+  button, a, select, input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smooth scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* iOS safe area */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 /* ===== CLICK ANIMATIONS ===== */
 
 /* Ripple effect */
