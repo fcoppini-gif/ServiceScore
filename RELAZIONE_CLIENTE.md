@@ -20,17 +20,22 @@ I Lions Club gestiscono manualmente centinaia di service ogni anno, con un dispe
 
 ## Funzionalità Principali
 
-### Per i Referenti di Club
+### Per i Soci e Referenti di Club
+- **Registrazione autonoma**: ogni Socio può registrarsi autonomamente inserendo la propria matricola Lions
+- **Accesso automatico**: dopo la verifica della matricola, l'account viene creato e collegato al proprio club
 - **Inserimento semplificato**: wizard guidato in 3 step per inserire i dati dei service
 - **Parametri flessibili**: i parametri opzionali possono essere lasciati a 0 senza influenzare il punteggio
 - **Club associati**: accesso solo ai propri club
 - **Storico**: visualizzazione di tutti i service inseriti con filtro per anno
 
 ### Per gli Amministratori
+- **Invito Soci**: possibilità di cercare e selezionare i Soci dal database esistente e inviargli un link di registrazione via email
+- **Registrazione manuale**: creazione manuale di account utente con username, password e ruolo
+- **Assegnazione club**: collegamento utenti ai club di riferimento
 - **Classifica completa**: visualizzazione di tutti i club e i loro punteggi
 - **Gestione parametri**: possibilità di impostare ogni parametro come obbligatorio o opzionale
 - **Statistiche dettagliate**: grafici interactivi con trend mensile, distribuzione per tipologia e top club
-- **Gestione completa**: CRUD per club, service, regole di calcolo, utenti
+- **Gestione completa**: CRUD per club, service, soci, officer, regole di calcolo, utenti
 - **Logo club**: possibilità di caricare un logo per ogni club
 
 ### Per Tutti gli Utenti
@@ -50,6 +55,8 @@ I Lions Club gestiscono manualmente centinaia di service ogni anno, con un dispe
 
 | Funzionalità | Descrizione |
 |--------------|-------------|
+| 👤 **Registrazione Autonoma** | I Soci possono registrarsi autonomamente inserendo la loro matricola Lions |
+| 📧 **Invito Amministratori** | Gli amministratori possono invitare i Soci via email con link personalizzato |
 | 🌐 **Dashboard Pubblica** | Pagina accessibile senza login con landing page, classifica e statistiche |
 | ✨ **Animazioni Click** | Sparkle burst, confetti, ripple effect su pulsanti e card - effetto spettacolare |
 | 📊 **Statistiche per Tutti** | Le statistiche sono ora accessibili anche ai referenti, con dati solo dei propri club |
@@ -103,11 +110,23 @@ Sono disponibili i seguenti documenti:
 
 ## Come Iniziare
 
+### Opzione 1: Registrazione Autonoma
 1. Accedi al sito web
-2. Verrai reindirizzato alla pagina di installazione
-3. Installa l'app sul tuo dispositivo
-4. Registrati con email e password
-5. Inizia a inserire i tuoi service!
+2. Clicca su "Registrati"
+3. Inserisci la tua matricola Socio Lions
+4. Il sistema verifica che la matricola sia valida
+5. Scegli username e password
+6. Accedi all'app - sei già collegato al tuo club!
+
+### Opzione 2: Invito dall'Amministratore
+1. Ricevi un'email di invito dall'amministratore
+2. Clicca sul link di registrazione
+3. Scegli username e password
+4. Accedi all'app
+
+### Opzione 3: Account Creato dall'Amministratore
+1. Ricevi username e password dall'amministratore
+2. Accedi direttamente all'app
 
 ---
 
