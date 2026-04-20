@@ -14,6 +14,7 @@ import SuccessView from './views/SuccessView';
 import AccountView from './views/AccountView';
 import AdminView from './views/AdminView';
 import PublicView from './views/PublicView';
+import ClubDetailView from './views/ClubDetailView';
 import { I18nProvider } from './lib/i18n';
 
 function AppContent() {
@@ -131,7 +132,7 @@ function AppContent() {
       <Routes>
         {/* Public routes - accessible without login */}
         <Route path="/" element={
-          user ? <Navigate to="/dashboard" replace /> : <PublicView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
+          user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
         } />
         <Route path="/login" element={
           user ? <Navigate to="/dashboard" replace /> : <LoginView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
@@ -148,6 +149,9 @@ function AppContent() {
         } />
         <Route path="/account" element={
           user ? <AccountView {...authProps} /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/club/:clubName" element={
+          user ? <ClubDetailView {...authProps} /> : <Navigate to="/login" replace />
         } />
         <Route path="/admin/:section?" element={
           user ? (isAdmin ? <AdminView {...authProps} /> : <Navigate to="/dashboard" replace />) : <Navigate to="/login" replace />
