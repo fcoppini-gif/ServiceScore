@@ -1,16 +1,58 @@
-# React + Vite
+# ServiceScore - Lions District 108
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web app per la gestione delle attività lionistiche del District 108 Italia.
 
-Currently, two official plugins are available:
+## Struttura
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Tabelle Database
+- **club** - 92 Lions Clubs
+- **soci** - ~3000 soci membri
+- **officer** - ~184 officer di club
+- **service_activities** - Attività di service
+- **utenti** - Utenti dell'app
 
-## React Compiler
+### Pagine
+1. **Login** - Accesso utente
+2. **Dashboard** - Panoramica con statistiche
+3. **Selezioni** - Filtri avanzati su soci, officer, attività
+4. **Club Detail** - Dettaglio singolo club
+5. **Admin** - Gestione utenti e dati
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Come Importare i Dati
 
-## Expanding the ESLint configuration
+### Metodo 1: Supabase SQL Editor
+Copiare il contenuto dei file:
+- `import-sql.sql` - Club (già importati)
+- `import-officers.sql` - Officer
+- `import-soci.sql` - Soci
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Metodo 2: Dalla App (Admin → Dati)
+1. Login come admin
+2. Vai su **Admin** → **Dati**
+3. Seleziona la tabella
+4. Click **Apri Gestionale**
+5. Click **Nuovo** per aggiungere record
+
+## Filtri Disponibili
+
+### Selezioni → Soci
+- Genere, Fasce età, Professione
+- Città, Provincia
+- Categoria associativa
+- Club, Zona, Circoscrizione
+
+### Selezioni → Officer
+- Titolo ufficiale
+- Data inizio/fine
+- Club, Zona, Circoscrizione
+
+### Selezioni → Attività
+- Club, Causa, Tipo progetto
+- Persone servite, Volontari, Fondi
+- Zona, Circoscrizione
+
+## Tech Stack
+- React + Vite
+- Supabase (database)
+- TailwindCSS
+- PWA (installabile)
