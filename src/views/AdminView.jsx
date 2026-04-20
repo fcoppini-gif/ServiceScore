@@ -1,12 +1,13 @@
 // =============================================================================
-// ADMIN SEMPLICE - Solo gestione utenti
+// ADMIN - Gestione utenti e dati
 // =============================================================================
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Users, Plus, Trash2, Edit3, Save, X, Link2, Unlink } from 'lucide-react';
+import { Users, Plus, Trash2, Edit3, Save, X, Link2, Unlink, Database, UserCheck, Building2, Heart } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import DataManager from '../components/DataManager';
 
 export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
   const navigate = useNavigate();
@@ -21,7 +22,18 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
 
   const tabs = [
     { id: 'utenti', label: 'Utenti', icon: Users },
+    { id: 'dati', label: 'Dati', icon: Database },
   ];
+
+  const dataTabs = [
+    { id: 'club', label: 'Club', icon: Building2 },
+    { id: 'soci', label: 'Soci', icon: UserCheck },
+    { id: 'officer', label: 'Officer', icon: Users },
+    { id: 'service_activities', label: 'Attività', icon: Heart },
+  ];
+
+  const [activeDataTable, setActiveDataTable] = useState('club');
+  const [showDataManager, setShowDataManager] = useState(false);
 
   useEffect(() => {
     if (section === 'utenti') fetchUsers();
@@ -104,6 +116,31 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
           ))}
         </div>
 
+        {/* DATI */}
+        {section === 'dati' && (
+          <div className="space-y-6">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {dataTabs.map((tab) => (
+                <button key={tab.id} onClick={() => { setActiveDataTable(tab.id); setShowDataManager(true); }}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold cursor-pointer border-none transition-all whitespace-nowrap ${
+                    activeDataTable === tab.id ? 'bg-brand-blue text-white' : 'bg-white dark:bg-white/10 text-slate-600 dark:text-white'
+                  }`}>
+                  <tab.icon size={16} /> {tab.label}
+                </button>
+              ))}
+            </div>
+            
+            <div className="bg-white dark:bg-white/[0.08] p-8 rounded-[2rem] text-center">
+              <Database size={48} className="mx-auto text-slate-300 mb-4" />
+              <h3 className="text-xl font-black uppercase mb-2">Gestione {dataTabs.find(t => t.id === activeDataTable)?.label}</h3>
+              <p className="text-slate-500 mb-6">Visualizza, modifica e elimina record</p>
+              <button onClick={() => setShowDataManager(true)} className="px-6 py-3 bg-brand-blue text-white rounded-xl font-bold hover:bg-brand-blue/90">
+                Apri Gestionale
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* UTENTI */}
         {section === 'utenti' && (
           <div className="space-y-6">
@@ -179,6 +216,11 @@ export default function AdminView({ userProfile, ThemeSwitcher, toast }) {
           </div>
         )}
       </div>
+
+      {showDataManager && (
+        <DataManager table={activeDataTable} onClose={() => setShowDataManager(false)} />
+      )}
+
       <Footer />
     </div>
   );
