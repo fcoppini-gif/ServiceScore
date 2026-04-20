@@ -135,7 +135,7 @@ function AppContent() {
       <Routes>
         {/* Public routes - accessible without login */}
         <Route path="/" element={
-          user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          user ? <Navigate to="/dashboard" replace /> : <PublicView />
         } />
         <Route path="/login" element={
           user ? <Navigate to="/dashboard" replace /> : <LoginView resolvedTheme={resolvedTheme} ThemeSwitcher={ThemeSwitcherWrapper} />
@@ -154,16 +154,16 @@ function AppContent() {
           user ? <AccountView {...authProps} /> : <Navigate to="/login" replace />
         } />
         <Route path="/club/:clubName" element={
-          user ? <ClubDetailView {...authProps} /> : <Navigate to="/login" replace />
+          user ? <ClubDetailView {...authProps} /> : <ClubDetailView isAdmin={false} userProfile={null} ThemeSwitcher={() => <></>} />
         } />
         <Route path="/selezioni" element={
-          user ? <SelezioniView {...authProps} /> : <Navigate to="/login" replace />
+          user ? <SelezioniView {...authProps} /> : <PublicView />
         } />
         <Route path="/nuovo-service" element={
           user ? <InsertServiceView {...authProps} /> : <Navigate to="/login" replace />
         } />
         <Route path="/classifica" element={
-          user ? <ClassificaView {...authProps} /> : <Navigate to="/login" replace />
+          user ? <ClassificaView {...authProps} /> : <PublicView />
         } />
         <Route path="/admin/:section?" element={
           user ? (isAdmin ? <AdminView {...authProps} /> : <Navigate to="/dashboard" replace />) : <Navigate to="/login" replace />
