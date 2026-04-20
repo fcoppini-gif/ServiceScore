@@ -9,8 +9,6 @@ import ThemeSwitcher from './components/ThemeSwitcher';
 import LoadingScreen from './components/LoadingScreen';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
-import InsertWizardView from './views/InsertWizardView';
-import SuccessView from './views/SuccessView';
 import AccountView from './views/AccountView';
 import AdminView from './views/AdminView';
 import PublicView from './views/PublicView';
@@ -145,12 +143,6 @@ function AppContent() {
         {/* Protected routes - require login */}
         <Route path="/dashboard" element={
           user ? <DashboardView {...authProps} /> : <Navigate to="/login" replace />
-        } />
-        <Route path="/insert" element={
-          user ? <InsertWizardView {...authProps} /> : <Navigate to="/login" replace />
-        } />
-        <Route path="/success" element={
-          user ? <SuccessView resolvedTheme={resolvedTheme} toast={toast} /> : <Navigate to="/login" replace />
         } />
         <Route path="/account" element={
           user ? <AccountView {...authProps} /> : <Navigate to="/login" replace />
